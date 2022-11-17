@@ -1,9 +1,23 @@
-%% Example Anterior Laxity
+%% Run Local Forward Simulation
 %==========================================================================
 % Author: Colin Smith
 %   https://github.com/opensim-jam-org/jam-resources/tree/main/matlab
 %
 % Revised by: Matthew Blomquist
+%
+% Purpose: To create files for running OpenSim-JAM forward simulations, to
+% run the simulations, and to put the results in the specified folders.
+%
+% Output: 
+%   Input files created in .\inputs
+%   Results files created in .\results
+%
+% Other .m files required:
+%   None
+%
+% Revision history:
+%   v1      11-17-2022      First commit (MBB)
+%
 %==========================================================================
 clear ; close all ; clc ;
 
@@ -11,6 +25,7 @@ import org.opensim.modeling.*
 % Logger.setLevelString( 'Info' ) ;
 
 %% Set Simulation Parameters
+%---------------------------
 
 % Specify starting directory and location of model file
 startDir = 'C:\Users\mbb201\Documents\MATLAB\Research\opensimModeling\opensim-jam-code' ;
@@ -27,31 +42,39 @@ startDir = 'C:\Users\mbb201\Documents\MATLAB\Research\opensimModeling\opensim-ja
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-testDof = 'flex' ;
+testDof = 'dist' ;
 
 % Specify flexion angle of knee during simulation
 %   For passive flexion, put angle to flex to (e.g., 90 for 90deg)
-kneeFlexAngle = 90 ;
+kneeFlexAngle = 10 ;
 
 % Specify external load applied
 %   Put 0 if passive flexion test
 %   Keep this number positive
-externalLoad = 0 ;
+externalLoad = 50 ;
 
 %% Compute trial name
+%--------------------
+
+% For passive flexion:
+%   1) flexion, 2) passive, 3) start flexion, 4) end flexion
+%   Ex: 'flex_passive_0_90'
+% For laxity tests:
+%   1) laxity, 2) degree of freedom, 3) force applied, 4) flexion angle
+%   Ex: 'lax_var_frc10_25'
 
 if strcmp( testDof , 'flex' ) % passive flexion
     trialName = [ 'flex_passive_0_' , num2str( kneeFlexAngle ) ] ;
-else % laxity test
+else % laxity tests
     trialName = [ 'lax_' , testDof , '_frc' , num2str( externalLoad ) , '_' , num2str( kneeFlexAngle ) ] ;
 end
 
 %% Define Simulation Time Points
 %-------------------------------
 % Simulation consists of three to five phases:
-% All simulations:
+% All simulations consist of:
 %   Settle : allow knee to settle into equilbrium
-%   Flex   : hip and knee flexion
+%   Flex   : period of knee flexion
 %   Settle : allow knee to settle into equilbrium
 % If laxity test, add these two:
 %   Force  : ramp up the desired external force
@@ -126,6 +149,8 @@ STOFileAdapter.write( coord_table , fullfile( startDir , 'inputs' , prescribedCo
 %% Create External Loads Files
 %------------------------------
 
+% Create external loads files if it is a laxity test (i.e., not a passive
+%   flexion test
 if ~strcmp( testDof , 'flex' ) % if not passive flexion test
 
     % .sto and .xml File Name
@@ -153,7 +178,7 @@ if ~strcmp( testDof , 'flex' ) % if not passive flexion test
     end
 
     % Create external load array
-    loadArray = [ 0 , 0 , 0 , 0 , loadMagnitude , loadMagnitude ] ;
+    loadArray = [ zeros( 1 , 4 ) , loadMagnitude , loadMagnitude ] ;
     smoothLoadArray = interp1( timePoints , loadArray , time , 'pchip' );
 
     % Construct arrays for sto file based on
@@ -207,9 +232,7 @@ if ~strcmp( testDof , 'flex' ) % if not passive flexion test
 
     % Function distributed in OpenSim Resources\Code\Matlab\Utilities
     loadTable = osimTableFromStruct( loadData ) ;
-
     loadTable.addTableMetaDataString( 'header' , [ trialName , ' External Load' ] )
-
     STOFileAdapter.write( loadTable , fullfile( startDir , 'inputs' , externalLoadsSto ) );
 
     % Construct External Force
@@ -229,7 +252,8 @@ if ~strcmp( testDof , 'flex' ) % if not passive flexion test
     extLoads.print( fullfile( startDir , 'inputs' , externalLoadsXml ) ) ;
 end
 
-%% Perform Simulation with ForsimTool
+%% Create Forward Simulation Settings File
+%-----------------------------------------
 
 % Specify settings
 forsimSettingsFileName = [ 'forsim_settings_' , trialName , '.xml' ] ;
@@ -282,6 +306,9 @@ end
 forsim.set_use_visualizer( false ) ; % use visualizer while running (true or false)
 forsim.print( fullfile( startDir , 'inputs' , forsimSettingsFileName ) ) ;
 
+%% Run Forward Simulation
+%-------------------------
+tic % compute time that simulation runs
 disp( 'Running Forsim Tool...' )
 forsim.run() ;
-disp( 'Simulation Complete.' )
+toc

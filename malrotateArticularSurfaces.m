@@ -42,10 +42,23 @@ switch simulationProg
         tibNorm = tib.norm;
         
 end
+
+% Plot points
+plotComponents = 0; % "1" to plot components at initial and final steps and "0" to not plot anything
+plotTroubleshooting = 0; % "1" to plot components at all steps and "0" to not plot anything
     
 %% APPLY OFFSET FOR TRANSFORMATION
 %   translate *.stl points such that origin for tranformation is located at
 %   the geometric center in AP and ML and the most distal in PD
+
+% Plot stl points
+if plotComponents == 1
+    figure()
+    plot3(femPts(:,1),femPts(:,2), femPts(:,3),'g.')
+    hold on
+    plot3(tibPts(:,1),tibPts(:,2), tibPts(:,3),'g.')
+    axis equal tight
+end
 
 
 % Define offsets for femoral articular surface based on axis of malrotation
@@ -129,6 +142,13 @@ apOffsetTib = -min(tibPts(:,1));
 
 tibCentered = [tibPts(:,1)+apOffsetTib,tibPts(:,2)-pdOffsetTib,tibPts(:,3)-mlOffsetTib];
 
+if plotComponents == 1 && plotTroubleshooting == 1
+    plot3(tibCentered(:,1),tibCentered(:,2), tibCentered(:,3),'cx')
+    axis equal tight
+%     plot3(femCentered(:,1),femCentered(:,2), femCentered(:,3),'cx')
+%     axis equal tight
+end
+
 
 %% ALIGN TO GS COORDINATE SYSTEM
 
@@ -157,6 +177,12 @@ femNormGS = femNormGS * Rx;
 
 tibGS = tibGS * Rx;
 tibNormGS = tibNormGS * Rx;
+
+if plotComponents == 1 && plotTroubleshooting == 1
+%     plot3(femGS(:,1),femGS(:,2), femGS(:,3),'ms')
+    plot3(tibGS(:,1),tibGS(:,2), tibGS(:,3),'ms')
+    axis equal tight
+end
 
 
 %% TRANSFORM ARTICULAR SURFACES USING RANDOMLY GENERATED TRANSFORMATION MATRIX
@@ -236,10 +262,29 @@ femNormTrans = femNormTrans * Ry;
 tibCenteredTrans = tibCenteredTrans * Ry;
 tibNormTrans = tibNormTrans * Ry;
 
+if plotComponents == 1 && plotTroubleshooting == 1
+    plot3(femCenteredTrans(:,1), femCenteredTrans(:,2), femCenteredTrans(:,3),'b.')
+    plot3(tibCenteredTrans(:,1), tibCenteredTrans(:,2), tibCenteredTrans(:,3),'b.')
+    axis equal tight
+end
+
 %% REMOVE OFFSET FOR TRANSFORMATION TO BRING BACK TO ORIGINAL MODEL COORDINATE SYSTEM
 
 femTrans = [femCenteredTrans(:,1) - apOffsetFem,femCenteredTrans(:,2) + pdOffsetFem,femCenteredTrans(:,3) - mlOffsetFem];
 tibTrans = [tibCenteredTrans(:,1) - apOffsetTib,tibCenteredTrans(:,2) + pdOffsetTib,tibCenteredTrans(:,3) + mlOffsetTib];
+
+if plotComponents == 1
+    figure()
+%     plot3(femTrans(:,1), femTrans(:,2), femTrans(:,3), 'k.')
+    hold on
+    plot3(tibTrans(:,1), tibTrans(:,2), tibTrans(:,3), 'k.')
+    axis equal tight
+    
+%     plot3(femPts(:,1),femPts(:,2), femPts(:,3),'g.')
+%     hold on
+    plot3(tibPts(:,1),tibPts(:,2), tibPts(:,3),'g.')
+
+end
 
 %assemble output structures
 %--------------------------

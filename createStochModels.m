@@ -103,7 +103,7 @@ for iFile = 1 : numFiles
     end
 end
 
-stochModelDir = 'stochModels' ;
+stochModelDir = Params.fileOut ;
 
 % Go through each model to set new parameters
 for iMdl = 1 : numModels

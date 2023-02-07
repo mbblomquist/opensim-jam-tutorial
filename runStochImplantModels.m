@@ -28,7 +28,7 @@ import org.opensim.modeling.*
 %----------------------------
 
 % File path to baseline model
-baseDir = 'C:\Users\mbb201\Documents\MATLAB\Research\opensimModeling\opensim-jam-code' ;
+baseDir = 'C:\Users\mbb201\Documents\MATLAB\Research\opensimModeling\opensim-jam-tutorial' ;
 Params.baseMdlFile = fullfile( baseDir , 'lenhart2015' , 'lenhart2015_implant.osim' ) ;
 
 % Number of models to run and create

@@ -20,7 +20,7 @@
 function StoData = batchProcessSims( Params )
 
 % Results Directory
-resultsDir = Params.resultsDir ;
+resultsDir = Params.baseOutDir ;
 
 %% Read results
 %---------------
@@ -31,9 +31,36 @@ for iMdl = 1 : Params.numModels
     % Read sto files and organize results
     for iTrial = 1 : length( trialNames )
 
-        % Names of results files
-        laxResultFile = [ trialNames{ iTrial } , '_' , num2str( iMdl ) , '_states.sto' ] ;
-        frcResultsFile = [ trialNames{ iTrial } , '_' , num2str( iMdl ) , '_ForceReporter_forces.sto' ] ;
+        % Define temporary trial name to extract temporary DOF
+        tempTrialName = Params.trialNames{ iTrial } ;
+        splitName = split( tempTrialName , '_' ) ;
+        if isequal( splitName{1} , 'flex' )
+            tempDOF = 'flex' ;
+        else
+            tempDOF = splitName{2} ;
+        end
+
+        switch Params.localOrHT
+            case 'local'
+                resultsDir = fullfile( Params.baseOutDir , 'results' ) ;
+
+                % Names of results files
+                laxResultFile = [ trialNames{ iTrial } , '_' , num2str( iMdl ) , '_states.sto' ] ;
+                frcResultsFile = [ trialNames{ iTrial } , '_' , num2str( iMdl ) , '_ForceReporter_forces.sto' ] ;
+            case 'HT'
+                resultsDir = fullfile( Params.baseOutDir , tempDOF , 'results' , num2str( iMdl-1) ) ;
+                % untar results and delete tar file if exists
+                if exist( fullfile( resultsDir , Params.resultsTarFile ), 'file' )
+                    untar( fullfile( resultsDir, Params.resultsTarFile ), resultsDir )
+                    delete( fullfile( resultsDir, Params.resultsTarFile ) )
+                end
+                % Names of results files
+                laxResultFile = [ trialNames{ iTrial } , '_states.sto' ] ;
+                frcResultsFile = [ trialNames{ iTrial } , '_ForceReporter_forces.sto' ] ;
+        end
+
+
+
 
         % Use read_opensim_mot function to read .sto files
         [ tempData.kine.data, tempData.kine.labels, tempData.kine.header ] = ...
@@ -313,94 +340,98 @@ function Idx = parseOpenSimSto( StoDataStruct, Params )
 %% Parse sto file
 %===============
 
-switch Params.model
-    case 'lenhart2015'
-        kineLabels = StoDataStruct.kine.labels ;
-        frcLabels = StoDataStruct.frc.labels ;
+kineLabels = StoDataStruct.kine.labels ;
+frcLabels = StoDataStruct.frc.labels ;
 
-        % FIND INDICES:
-        %==============
+% FIND INDICES:
+%==============
 
-        % Time
-        %------
-        Idx.time = find( strcmp( kineLabels, 'time' ) ) ;
+% Time
+%------
+Idx.time = find( strcmp( kineLabels, 'time' ) ) ;
 
-        % Kinematics
-        %------------
-        %   Tibiofemoral Joint
-        if any( contains( Params.jointKinematics , 'knee_r' ) )
-            Idx.kine.tf.fe = find( strcmp( kineLabels, '/jointset/knee_r/knee_flex_r/value' ) ) ;
-            Idx.kine.tf.vv = find( strcmp( kineLabels, '/jointset/knee_r/knee_add_r/value' ) ) ;
-            Idx.kine.tf.ie = find( strcmp( kineLabels, '/jointset/knee_r/knee_rot_r/value' ) ) ;
-            Idx.kine.tf.ap = find( strcmp( kineLabels, '/jointset/knee_r/knee_tx_r/value' ) ) ;
-            Idx.kine.tf.pd = find( strcmp( kineLabels, '/jointset/knee_r/knee_ty_r/value' ) ) ;
-            Idx.kine.tf.ml = find( strcmp( kineLabels, '/jointset/knee_r/knee_tz_r/value' ) ) ;
+% Kinematics
+%------------
+%   Tibiofemoral Joint
+if any( contains( Params.jointKinematics , 'knee_r' ) )
+    Idx.kine.tf.fe = find( strcmp( kineLabels, '/jointset/knee_r/knee_flex_r/value' ) ) ;
+    Idx.kine.tf.vv = find( strcmp( kineLabels, '/jointset/knee_r/knee_add_r/value' ) ) ;
+    Idx.kine.tf.ie = find( strcmp( kineLabels, '/jointset/knee_r/knee_rot_r/value' ) ) ;
+    Idx.kine.tf.ap = find( strcmp( kineLabels, '/jointset/knee_r/knee_tx_r/value' ) ) ;
+    Idx.kine.tf.pd = find( strcmp( kineLabels, '/jointset/knee_r/knee_ty_r/value' ) ) ;
+    Idx.kine.tf.ml = find( strcmp( kineLabels, '/jointset/knee_r/knee_tz_r/value' ) ) ;
+end
+%   Patellofemoral Joint
+if any( contains( Params.jointKinematics , 'pf_r' ) )
+    Idx.kine.pf.fe = find( strcmp( kineLabels, '/jointset/pf_r/pf_flex_r/value' ) ) ;
+    Idx.kine.pf.rot = find( strcmp( kineLabels, '/jointset/pf_r/pf_rot_r/value' ) ) ;
+    Idx.kine.pf.tilt = find( strcmp( kineLabels, '/jointset/pf_r/pf_tilt_r/value' ) ) ;
+    Idx.kine.pf.ap = find( strcmp( kineLabels, '/jointset/pf_r/pf_tx_r/value' ) ) ;
+    Idx.kine.pf.pd = find( strcmp( kineLabels, '/jointset/pf_r/pf_ty_r/value' ) ) ;
+    Idx.kine.pf.ml = find( strcmp( kineLabels, '/jointset/pf_r/pf_tz_r/value' ) ) ;
+end
+
+% Muscles
+%---------
+mslNames = Params.muscleNames ;
+numMsls = length( mslNames ) ;
+mslProp = Params.muscleProperties ;
+numProps = length( mslProp ) ;
+
+% Go through muscles
+for iMsl = 1 : numMsls
+    mslId = mslNames{ iMsl } ;
+
+    % Go through muscle properties
+    for iProp = 1 : numProps
+        switch mslProp{ iProp }
+            case 'force'
+                Idx.msl.( mslId ).( mslProp{ iProp } ) = ...
+                    find( strcmp( frcLabels, mslId ) ) ; % Look in frcLabels
+            case 'fiber_length'
+                Idx.msl.( mslId ).( mslProp{ iProp } ) = ...
+                    find( contains( kineLabels, mslId ) & endsWith( kineLabels , mslProp{iProp} ) ) ; % Look in kineLabels
         end
-        %   Patellofemoral Joint
-        if any( contains( Params.jointKinematics , 'pf_r' ) )
-            Idx.kine.pf.fe = find( strcmp( kineLabels, '/jointset/pf_r/pf_flex_r/value' ) ) ;
-            Idx.kine.pf.rot = find( strcmp( kineLabels, '/jointset/pf_r/pf_rot_r/value' ) ) ;
-            Idx.kine.pf.tilt = find( strcmp( kineLabels, '/jointset/pf_r/pf_tilt_r/value' ) ) ;
-            Idx.kine.pf.ap = find( strcmp( kineLabels, '/jointset/pf_r/pf_tx_r/value' ) ) ;
-            Idx.kine.pf.pd = find( strcmp( kineLabels, '/jointset/pf_r/pf_ty_r/value' ) ) ;
-            Idx.kine.pf.ml = find( strcmp( kineLabels, '/jointset/pf_r/pf_tz_r/value' ) ) ;
-        end
+    end
 
-        % Muscles
-        %---------
-        mslNames = Params.muscleNames ;
-        numMsls = length( mslNames ) ;
-        mslProp = Params.muscleProperties ;
-        numProps = length( mslProp ) ;
+end
 
-        % Go through muscles
-        for iMsl = 1 : numMsls
-            mslId = mslNames{ iMsl } ;
+% Ligaments
+%-----------
+if isequal( Params.ligamentNames , 'allLigs' )
+    ligNames = findLigNames( Params ) ;
+else
+    ligNames = Params.ligamentNames ;
+end
+numLigs = length( ligNames ) ;
+ligProp = Params.ligamentProperties ;
+numProps = length( ligProp ) ;
 
-            % Go through muscle properties
-            for iProp = 1 : numProps
-                switch mslProp{ iProp }
-                    case 'force'
-                        Idx.msl.( mslId ).( mslProp{ iProp } ) = ...
-                            find( strcmp( frcLabels, mslId ) ) ; % Look in frcLabels
-                    case 'fiber_length'
-                        Idx.msl.( mslId ).( mslProp{ iProp } ) = ...
-                            find( contains( kineLabels, mslId ) & endsWith( kineLabels , mslProp{iProp} ) ) ; % Look in kineLabels
-                end
-            end
+% Go through ligaments
+for iLig = 1 : numLigs
+    ligId = ligNames{ iLig } ;
 
-        end
+    % Go through ligament properties
+    for iProp = 1 : numProps
+        Idx.lig.( ligNames{ iLig } ).( ligProp{iProp} ) = ...
+            find( strncmpi( frcLabels, ligId, length( ligId ) ) & endsWith( frcLabels , ligProp{iProp} ) ) ;
+    end
 
-        % Ligaments
-        %-----------
-        ligNames = Params.ligamentNames ;
-        numLigs = length( ligNames ) ;
-        ligProp = Params.ligamentProperties ;
-        numProps = length( ligProp ) ;
-
-        % Go through ligaments
-        for iLig = 1 : numLigs
-            ligId = ligNames{ iLig } ;
-
-            % Go through ligament properties
-            for iProp = 1 : numProps
-                Idx.lig.( ligNames{ iLig } ).( ligProp{iProp} ) = ...
-                    find( strncmpi( frcLabels, ligId, length( ligId ) ) & endsWith( frcLabels , ligProp{iProp} ) ) ;
-            end
-
-        end
+end
 
 
-        % Contact Forces
-        %----------------
-        cntCompNames = Params.contactCompartmentNames ;
-        numCntComp = length( cntCompNames ) ;
-        contactLoadNames = Params.contactForces ;
-        numContLoads = length( contactLoadNames ) ;
+% Contact Forces
+%----------------
+cntCompNames = Params.contactCompartmentNames ;
+numCntComp = length( cntCompNames ) ;
+contactLoadNames = Params.contactForces ;
+numContLoads = length( contactLoadNames ) ;
 
-        % Loop through compartment names
-        for iCntComp = 1 : numCntComp
+% Loop through compartment names
+for iCntComp = 1 : numCntComp
 
+    switch Params.baseMdl
+        case 'lenhart2015'
             % Specify which cartilage surface to find data from
             switch cntCompNames{ iCntComp }
                 case 'tf_contact'
@@ -408,33 +439,40 @@ switch Params.model
                 case 'pf_contact'
                     cart = 'patella_cartilage' ;
             end
-
-            % Loop through contact loads
-            for iCntLoad = 1 : numContLoads
-                Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
-                    find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
-                    contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
-                    contains( frcLabels , cart ) ) ; % contains cartilage surface
+        case 'lenhart2015_implant'
+            % Specify which cartilage surface to find data from
+            switch cntCompNames{ iCntComp }
+                case 'tf_contact'
+                    cart = 'tibia_implant' ;
+                case 'pf_contact'
+                    cart = 'patella_implant' ;
             end
-
-        end
-
-        % External Loads
-        %---------------
-
-        % F = forces, p = load locations, T = torques
-        extLoads = { 'load_Fx' , 'load_Fy' , 'load_Fz' , ...
-            'load_px' , 'load_py' , 'load_pz' , ...
-            'load_Tx' , 'load_Ty' , 'load_Tz' } ;
-        numExtLoad = length( extLoads ) ;
-
-        % Loop through external loads
-        for iExtLoad = 1 : numExtLoad
-            Idx.extLoad.( extLoads{iExtLoad} ) = ...
-                find( endsWith( frcLabels , extLoads{iExtLoad} ) ) ;
-        end
+    end
 
 
+    % Loop through contact loads
+    for iCntLoad = 1 : numContLoads
+        Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
+            find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
+            contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
+            contains( frcLabels , cart ) ) ; % contains cartilage surface
+    end
+
+end
+
+% External Loads
+%---------------
+
+% F = forces, p = load locations, T = torques
+extLoads = { 'load_Fx' , 'load_Fy' , 'load_Fz' , ...
+    'load_px' , 'load_py' , 'load_pz' , ...
+    'load_Tx' , 'load_Ty' , 'load_Tz' } ;
+numExtLoad = length( extLoads ) ;
+
+% Loop through external loads
+for iExtLoad = 1 : numExtLoad
+    Idx.extLoad.( extLoads{iExtLoad} ) = ...
+        find( endsWith( frcLabels , extLoads{iExtLoad} ) ) ;
 end
 
 end
@@ -593,6 +631,25 @@ end
         x=data(:,1:nc);
         [m,n]=size(data);
         outdata=data(:,(nc+1):n);
+    end
+
+end
+
+
+function ligNames = findLigNames( Params )
+
+    if contains( Params.ligamentNames , 'allLigs' )
+        switch Params.baseMdl
+            case 'lenhart2015'
+                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
+                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
+                    'lPFL', 'mPFL' } ;
+            case 'lenhart2015_implant'
+                ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
+                    'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
+        end
+    else
+        ligNames = Params.ligamentNames ;
     end
 
 end

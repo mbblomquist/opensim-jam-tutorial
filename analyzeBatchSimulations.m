@@ -11,47 +11,56 @@
 %   processLocalSims.m
 %
 % Revision history:
-%   v1      11-17-2022      First commit (MBB)
+% v1    11-17-2022  First commit (MBB)
+% v2    03-30-2023  Updated for local or HT (MBB)
 %
 %==========================================================================
+clc ; clear ; close all ;
 
-clear ; close all ;
+%% ======================= Specify Settings ===========================
+% Look through this entire section to change parameters to whatever you
+% wish to run. This entire section is creating a structure full of
+% parameters to analyze the simulations and extract parameters that you
+% want
+% =====================================================================
 
-%% Specify parameters (change these to desired parameters and file locations)
-%----------------------------------------------------------------------------
+% ------------------------------------------------------------------------
+% -------------------------- SPECIFY LOCAL VS HT -------------------------
+% ------------------------------------------------------------------------
 
-% Results directory
-Params.resultsDir = 'C:\Users\mbb201\Documents\MATLAB\Research\opensimModeling\opensim-jam-code\results' ;
+% Specify whether to run locally or whether you will run the models on the
+% high-throughput grid
+% Options: 'local' or 'HT'
+Params.localOrHT = 'HT' ;
+
+% Set base name of output folder where models, exectuables, and inputs
+% should be created
+switch Params.localOrHT
+    case 'local'
+        % You don't need to change this. The output directory is in the
+        % current directory (pwd = print working directory)
+        Params.baseOutDir = pwd ;
+    case 'HT'
+        % IF RUNNING ON CHTC, CHANGE THIS TO THE PLACE THE FILES WERE
+        % CREATED
+        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testNewCode2' ;
+        % Name of results file (no need to change this)
+        Params.resultsTarFile = 'results.tar.gz' ;
+end
+
+% ------------------------------------------------------------------------
+% ----------------------- SPECIFY MODEL PARAMETERS -----------------------
+% ------------------------------------------------------------------------
+% Specif the model parameters that you want to extract
 
 % Number of models that were run
 Params.numModels = 10 ;
 
-% Laxity Test or Passive Flexion Test
-%   For Laxity Tests, options are:
-%       Anterior: 'ant'
-%       Posterior: 'post'
-%       Varus: 'var'
-%       Valgus: 'val'
-%       Internal Rotation: 'ir'
-%       External Rotation: 'er'
-%       Compression: 'comp'
-%       Distraction: 'dist'
-%   For Passive Flexion, options are:
-%       Passive: 'flex'
-testDof = 'var' ;
-
-% Specify flexion angle of knee during simulation
-kneeFlexAngle = 25 ;
-
-% Specify external load applied
-externalLoad = 10 ;
-
-% Choose model:
-%   options: lenhart2015
-Params.model = 'lenhart2015' ;
-
-% Specify which data to pull:
-%----------------------------
+% Base model used. Options are in lenhart2015 folder
+%   Current options =
+%       'lenhart2015' (intact model)
+%       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
+Params.baseMdl = 'lenhart2015' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -72,10 +81,12 @@ Params.muscleNames = { 'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' , ...
 Params.muscleProperties = { 'force' , 'fiber_length' } ;
 
 % Ligament names
-%   Options: { 'MCLd' , 'MCLs' , 'MCLp' , 'ACLpl' , 'ACLam' , 'PCLal' , ...
-%   'PCLpm' , 'LCL' , 'PFL' , 'ITB' , 'PT' , 'lPFL' , 'mPFL' ,  'pCAP' }
-Params.ligamentNames = { 'MCLd' , 'MCLs' , 'MCLp' , 'ACLpl' , 'ACLam' , 'PCLal' , ...
-    'PCLpm' , 'LCL' , 'PFL' , 'ITB' , 'PT' , 'lPFL' , 'mPFL' ,  'pCAP' } ;
+%   Options: 'allLigs' to extract data on all of the ligaments in the model
+%                           OR
+%     [cell array with each ligament you want to extract]
+%       'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , 'LCL', 'ITB', 'PFL',
+%       'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL'
+Params.ligamentNames = 'allLigs' ;
 
 % Ligament properties
 %   Options: { 'force_spring' , 'force_damping' , 'force_total' , 'length' ,
@@ -98,36 +109,69 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
     'contact_force_z' , 'contact_moment_x' , 'contact_moment_y' , ...
     'contact_moment_z' } ;
 
-%% Set up for post-processing
-%----------------------------
+% ------------------------------------------------------------------------
+% -------------------- SPECIFY SIMULATION PARAMETERS ---------------------
+% ------------------------------------------------------------------------
 
-if strcmp( testDof , 'flex' ) % passive flexion
-    trialNames = { [ 'flex_passive_0_' , num2str( kneeFlexAngle ) ] } ;
-else % laxity tests
-    trialNames = { [ 'lax_' , testDof , '_frc' , num2str( externalLoad ) , '_' , num2str( kneeFlexAngle ) ] } ;
+% Specify forward simulation test(s) to run [cell array]
+%   For Laxity Tests, options are:
+%       Anterior: 'ant'
+%       Posterior: 'post'
+%       Varus: 'var'
+%       Valgus: 'val'
+%       Internal Rotation: 'ir'
+%       External Rotation: 'er'
+%       Compression: 'comp'
+%       Distraction: 'dist'
+%   For Passive Flexion, options are:
+%       Passive: 'flex'
+Params.testDOFs = { 'var' } ;
+
+% Specify flexion angle(s) of knee during each simulation [cell array]
+%   For passive flexion, you can leave blank
+%   Each testDOF will be run at each flexion angle (so the total number of
+%   simulations will be length(testDOFs) * length( kneeFlexAngles )
+Params.kneeFlexAngles = { 0 , 20 } ;
+
+% Specify external load(s) applied, one for each testDOFs [cell array]
+%   Put 0 if passive flexion test
+%   Keep this number positive
+Params.externalLoads = { 10 } ;
+
+%% ======================== Compute Trial Name ===========================
+% Computes the trial name(s) that will be used for running through the
+% results files
+% ========================================================================
+
+% For passive flexion:
+%   1) flexion, 2) passive, 3) start flexion, 4) end flexion
+%   Ex: 'flex_passive_0_90'
+% For laxity tests:
+%   1) laxity, 2) degree of freedom, 3) force applied, 4) flexion angle
+%   Ex: 'lax_var_frc10_25'
+
+Params.trialNames = { } ; % initialize
+trialCounter = 1 ; % counter for loop
+for iDOF = 1 : length( Params.testDOFs )
+    if ~isequal( Params.testDOFs{iDOF} , 'flex' ) % if laxity test
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF} ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
+    elseif isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
+        Params.trialNames{ trialCounter } = 'flex_passive_0_90' ;
+        trialCounter = trialCounter + 1 ;
+    end
 end
-Params.trialNames = trialNames ;
+
+Params.numTrials = length( Params.trialNames ) ;
+
+clear trialCounter iDOF iAng
 
 %% Run processLocalSims
 %----------------------
 simData = batchProcessSims( Params ) ;
 
-%% Load Stoch Data File
-%-----------------------
-
-load( 'stochModels\stochMdlParams.mat' )
-
 %% Analyze Data
-
-% Compute varus laxity values for each model
-%   Laxity = kinematics change from end of load to start of load
-varLaxity = simData.lax_var_frc10_25.kine.tf.vv( end , : ) - ...
-    simData.lax_var_frc10_25.kine.tf.vv( 201 , : ) ;
-
-% Compute LCL slack length changes from baseline
-%   Multiply by 100 to change to %
-LCLchanges = StochMdlParams.stoch.LCL.slack_length * 100 ;
-
-figure() ; grid on ; hold on ;
-scatter( varLaxity , LCLchanges , 'filled' ) 
-xlabel( 'Varus Laxity (deg)' ) ; ylabel( 'LCL Slack Length Change (%)' ) ;
+% ADD CODE HERE TO ANALYZE DATA THAT YOU WANT TO ANALYZE

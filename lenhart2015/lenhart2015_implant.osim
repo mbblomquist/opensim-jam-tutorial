@@ -611,7 +611,7 @@
 							<!--Name of geometry file.-->
 							<mesh_file>lenhart2015-R-femur-bone.stl</mesh_file>
 						</Mesh>
-						<Mesh name="femur_cartilage">
+						<Mesh name="femur_implant">
 							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
 							<socket_frame>..</socket_frame>
 							<!--Path to an output (channel) to satisfy the one-value Input 'transform' of type SimTK::Transform (description: The transform that positions the Geometry in Ground so it can be positioned. Note, either the Geometry is attached to a Frame OR the input transform can be supplied, but not both. ).-->
@@ -700,7 +700,7 @@
 							<!--Name of geometry file.-->
 							<mesh_file>lenhart2015-R-patella-bone.stl</mesh_file>
 						</Mesh>
-						<Mesh name="patella_cartilage">
+						<Mesh name="patella_implant">
 							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
 							<socket_frame>..</socket_frame>
 							<!--Path to an output (channel) to satisfy the one-value Input 'transform' of type SimTK::Transform (description: The transform that positions the Geometry in Ground so it can be positioned. Note, either the Geometry is attached to a Frame OR the input transform can be supplied, but not both. ).-->
@@ -773,7 +773,7 @@
 							<!--Name of geometry file.-->
 							<mesh_file>lenhart2015-R-tibia-bone.stl</mesh_file>
 						</Mesh>
-						<Mesh name="tibia_cartilage">
+						<Mesh name="tibia_implant">
 							<!--Path to a Component that satisfies the Socket 'frame' of type Frame.-->
 							<socket_frame>..</socket_frame>
 							<!--Path to an output (channel) to satisfy the one-value Input 'transform' of type SimTK::Transform (description: The transform that positions the Geometry in Ground so it can be positioned. Note, either the Geometry is attached to a Frame OR the input transform can be supplied, but not both. ).-->
@@ -4772,7 +4772,7 @@
 						</Coordinate>
 						<Coordinate name="pf_tx_r">
 							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0.052999999999999999</default_value>
+							<default_value>0.053</default_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
 							<range>-0.20000000000000001 0.20000000000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
@@ -4796,7 +4796,7 @@
 						</Coordinate>
 						<Coordinate name="pf_tz_r">
 							<!--The value of this coordinate before any value has been set. Rotational coordinate value is in radians and Translational in meters.-->
-							<default_value>0.0040000000000000001</default_value>
+							<default_value>0.004</default_value>
 							<!--The minimum and maximum values that the coordinate can range between. Rotational coordinate range in radians and Translational in meters.-->
 							<range>-0.20000000000000001 0.20000000000000001</range>
 							<!--Flag indicating whether or not the values of the coordinates should be limited to the range, above.-->
@@ -10817,236 +10817,6 @@
 						<!--All properties of this object have their default values.-->
 					</TendonForceLengthCurve>
 				</Millard2012EquilibriumMuscle>
-				<Blankevoort1991Ligament name="MCLd1">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="MCLd1-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0017455000000000001 -0.00045737000000000002 -0.037268999999999997</location>
-								</PathPoint>
-								<PathPoint name="MCLd1-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.00021515 -0.031852999999999999 -0.031378999999999997</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--The wrap objects that are associated with this path-->
-						<PathWrapSet>
-							<objects>
-								<PathWrap name="pathwrap_">
-									<!--A WrapObject that this PathWrap interacts with.-->
-									<wrap_object>Med_Lig_r</wrap_object>
-									<!--The wrapping method used to solve the path around the wrap object.-->
-									<method>hybrid</method>
-								</PathWrap>
-							</objects>
-						</PathWrapSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.03075</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="MCLd2">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="MCLd2-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0028898999999999999 -0.00067420000000000002 -0.038034999999999999</location>
-								</PathPoint>
-								<PathPoint name="MCLd2-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0049462999999999998 -0.031261999999999998 -0.031378999999999997</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--The wrap objects that are associated with this path-->
-						<PathWrapSet>
-							<objects>
-								<PathWrap name="pathwrap_">
-									<!--A WrapObject that this PathWrap interacts with.-->
-									<wrap_object>Med_Lig_r</wrap_object>
-									<!--The wrapping method used to solve the path around the wrap object.-->
-									<method>hybrid</method>
-								</PathWrap>
-							</objects>
-						</PathWrapSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.031978200000000054</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="MCLd3">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="MCLd3-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0038775000572204578 0.001000183845370941 -0.039033000946044921</location>
-								</PathPoint>
-								<PathPoint name="MCLd3-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0054197999999999998 -0.032627000000000003 -0.031467000000000002</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--The wrap objects that are associated with this path-->
-						<PathWrapSet>
-							<objects>
-								<PathWrap name="pathwrap_">
-									<!--A WrapObject that this PathWrap interacts with.-->
-									<wrap_object>Med_Lig_r</wrap_object>
-									<!--The wrapping method used to solve the path around the wrap object.-->
-									<method>hybrid</method>
-								</PathWrap>
-							</objects>
-						</PathWrapSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.034121399999999996</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="MCLd4">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="MCLd4-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.00096177000000000003 0.0014429 -0.038235999999999999</location>
-								</PathPoint>
-								<PathPoint name="MCLd4-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.0026082000000000002 -0.032413999999999998 -0.031426999999999997</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--The wrap objects that are associated with this path-->
-						<PathWrapSet>
-							<objects>
-								<PathWrap name="pathwrap_">
-									<!--A WrapObject that this PathWrap interacts with.-->
-									<wrap_object>Med_Lig_r</wrap_object>
-									<!--The wrapping method used to solve the path around the wrap object.-->
-									<method>hybrid</method>
-								</PathWrap>
-							</objects>
-						</PathWrapSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033244299999999997</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="MCLd5">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="MCLd5-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0010824999999999999 0.0046882 -0.038669000000000002</location>
-								</PathPoint>
-								<PathPoint name="MCLd5-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-9.2906999999999997e-05 -0.033387 -0.031424000000000001</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--The wrap objects that are associated with this path-->
-						<PathWrapSet>
-							<objects>
-								<PathWrap name="pathwrap_">
-									<!--A WrapObject that this PathWrap interacts with.-->
-									<wrap_object>Med_Lig_r</wrap_object>
-									<!--The wrapping method used to solve the path around the wrap object.-->
-									<method>hybrid</method>
-								</PathWrap>
-							</objects>
-						</PathWrapSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.03727980000000005</slack_length>
-				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs1">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
 					<appliesForce>true</appliesForce>
@@ -11083,15 +10853,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.069542998000000009</slack_length>
+					<slack_length>0.06995126456</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs2">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11129,15 +10899,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.081796181999999995</slack_length>
+					<slack_length>0.08227638341</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs3">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11175,15 +10945,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.06007087299999999</slack_length>
+					<slack_length>0.06042353149</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs4">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11221,15 +10991,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.080091891999999998</slack_length>
+					<slack_length>0.08056208803</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs5">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11267,15 +11037,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.072550000000000003</slack_length>
+					<slack_length>0.07297591979</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="MCLs6">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11313,435 +11083,15 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>500</linear_stiffness>
+					<linear_stiffness>392.4186056</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.072149686000000005</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl1">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl1-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0026525330543518068 -0.00097174353280479406 0.0061877264033059877</location>
-								</PathPoint>
-								<PathPoint name="ACLpl1-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.010135999999999999 -0.020482 -0.00036185999999999998</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.024799999999999999</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl2">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl2-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.006386850357055664 -0.0026330257425151446 0.0075408554077148436</location>
-								</PathPoint>
-								<PathPoint name="ACLpl2-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.010071 -0.021322000000000001 0.0039157999999999997</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.0241</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl3">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl3-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0055802135467529299 -0.0013125636121911271 0.0075058445930480961</location>
-								</PathPoint>
-								<PathPoint name="ACLpl3-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.014123 -0.021793 0.0014326</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.0281</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl4">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl4-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0036749155521392822 -0.0015894513670394871 0.0065437687579169082</location>
-								</PathPoint>
-								<PathPoint name="ACLpl4-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.014311000000000001 -0.021465000000000001 0.0048355000000000004</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.026499999999999999</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl5">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl5-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.00550221586227417 -0.00096156188175541499 0.0074398503303527829</location>
-								</PathPoint>
-								<PathPoint name="ACLpl5-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.012201 -0.021304 0.0017124</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.026200000000000001</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLpl6">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLpl6-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0061628708839416508 -0.0024929120476282944 0.0076914186477661135</location>
-								</PathPoint>
-								<PathPoint name="ACLpl6-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.012531 -0.021975999999999999 0.0043276</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.0263</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam1">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam1-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-2.3181283846497536e-05 0.0032419503424463299 0.0028117513862008538</location>
-								</PathPoint>
-								<PathPoint name="ACLam1-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.016437 -0.020666 -0.0052185</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.0344</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam2">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam2-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0025248792171478273 0.00035098344276383387 0.0057664353827073566</location>
-								</PathPoint>
-								<PathPoint name="ACLam2-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.014971999999999999 -0.021642000000000002 -0.00057087999999999996</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.030499999999999999</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam3">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam3-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.00093444138765335087 0.0024282856152277646 0.0041913533563899246</location>
-								</PathPoint>
-								<PathPoint name="ACLam3-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.011939 -0.019622000000000001 -0.0038468</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.030236200000000001</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam4">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam4-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0016442707777023315 0.0022443396402671853 0.004893828089532576</location>
-								</PathPoint>
-								<PathPoint name="ACLam4-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.018516999999999999 -0.022158000000000001 -0.001854</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.034882499999999941</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam5">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam5-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.00022958938777446747 0.0028314531524225688 0.0031747872081255651</location>
-								</PathPoint>
-								<PathPoint name="ACLam5-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.016132000000000001 -0.020930000000000001 -0.0036844999999999998</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033822100000000001</slack_length>
-				</Blankevoort1991Ligament>
-				<Blankevoort1991Ligament name="ACLam6">
-					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
-					<appliesForce>true</appliesForce>
-					<!--The set of points defining the path of the ligament-->
-					<GeometryPath name="geometrypath">
-						<!--The set of points defining the path-->
-						<PathPointSet>
-							<objects>
-								<PathPoint name="ACLam6-P1">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/femur_distal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>-0.0018326642513275147 0.0012764363723993598 0.0053658594542197024</location>
-								</PathPoint>
-								<PathPoint name="ACLam6-P2">
-									<!--Path to a Component that satisfies the Socket 'parent_frame' of type PhysicalFrame (description: The frame in which this path point is defined.).-->
-									<socket_parent_frame>/bodyset/tibia_proximal_r</socket_parent_frame>
-									<!--The fixed location of the path point expressed in its parent frame.-->
-									<location>0.016386999999999999 -0.021739999999999999 -0.0013454999999999999</location>
-								</PathPoint>
-							</objects>
-						</PathPointSet>
-						<!--Default appearance attributes for this GeometryPath-->
-						<Appearance>
-							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
-							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
-							<color>0.1202 0.70540000000000003 0.1318</color>
-						</Appearance>
-					</GeometryPath>
-					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>820</linear_stiffness>
-					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033487799999999998</slack_length>
+					<slack_length>0.07257325566</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PCLal1">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -11768,7 +11118,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11803,7 +11153,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11838,7 +11188,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11873,7 +11223,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11908,7 +11258,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11943,7 +11293,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -11978,7 +11328,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12013,7 +11363,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12048,7 +11398,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12083,7 +11433,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12124,7 +11474,7 @@
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>600</linear_stiffness>
+					<linear_stiffness>770</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
 					<slack_length>0.050139847000000001</slack_length>
 				</Blankevoort1991Ligament>
@@ -12159,9 +11509,9 @@
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>600</linear_stiffness>
+					<linear_stiffness>770</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.056875943999999998</slack_length>
+					<slack_length>0.056875943999999997</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="LCL3">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -12194,9 +11544,9 @@
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>600</linear_stiffness>
+					<linear_stiffness>770</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.054395601000000002</slack_length>
+					<slack_length>0.054395601000000001</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="LCL4">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -12229,9 +11579,9 @@
 						</Appearance>
 					</GeometryPath>
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
-					<linear_stiffness>600</linear_stiffness>
+					<linear_stiffness>770</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.058509126000000002</slack_length>
+					<slack_length>0.058509125999999999</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PT1">
 					<!--The set of points defining the path of the ligament-->
@@ -12267,7 +11617,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12311,7 +11661,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12355,7 +11705,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12399,7 +11749,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12443,7 +11793,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12487,7 +11837,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12520,7 +11870,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12528,7 +11878,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.034136600000000017</slack_length>
+					<slack_length>0.03925709</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL2">
 					<!--The set of points defining the path of the ligament-->
@@ -12553,7 +11903,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12561,7 +11911,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.036589299999999998</slack_length>
+					<slack_length>0.042077695</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL3">
 					<!--The set of points defining the path of the ligament-->
@@ -12586,7 +11936,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12594,7 +11944,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033732500000000006</slack_length>
+					<slack_length>0.038792375</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL4">
 					<!--The set of points defining the path of the ligament-->
@@ -12619,7 +11969,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12627,7 +11977,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.032924500000000009</slack_length>
+					<slack_length>0.037863175</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL5">
 					<!--The set of points defining the path of the ligament-->
@@ -12652,7 +12002,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12660,7 +12010,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.032924500000000002</slack_length>
+					<slack_length>0.037863175</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL6">
 					<!--The set of points defining the path of the ligament-->
@@ -12685,7 +12035,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12693,7 +12043,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033154700000000002</slack_length>
+					<slack_length>0.038127905</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL7">
 					<!--The set of points defining the path of the ligament-->
@@ -12718,7 +12068,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12726,7 +12076,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033461000000000005</slack_length>
+					<slack_length>0.03848015</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="lPFL8">
 					<!--The set of points defining the path of the ligament-->
@@ -12751,7 +12101,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12759,7 +12109,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>150</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.033612200000000002</slack_length>
+					<slack_length>0.03865403</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="mPFL1">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -12786,7 +12136,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12819,7 +12169,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12852,7 +12202,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12885,7 +12235,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12918,7 +12268,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12951,7 +12301,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -12997,7 +12347,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13043,7 +12393,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13089,7 +12439,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13135,7 +12485,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13181,7 +12531,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13224,7 +12574,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>440</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.0427786</slack_length>
+					<slack_length>0.046200888</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PFL2">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -13259,7 +12609,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>440</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.043233599999999997</slack_length>
+					<slack_length>0.046692288</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PFL3">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -13294,7 +12644,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>440</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.048130499999999993</slack_length>
+					<slack_length>0.05198094</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PFL4">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -13329,7 +12679,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>440</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.048640599999999999</slack_length>
+					<slack_length>0.052531848</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="PFL5">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -13364,7 +12714,7 @@
 					<!--The slope of the linear region of the force-strain curve. Units of force/strain (N).-->
 					<linear_stiffness>440</linear_stiffness>
 					<!--The length at which ligament begins developing tension. Units of m.-->
-					<slack_length>0.046079100000000039</slack_length>
+					<slack_length>0.049765428</slack_length>
 				</Blankevoort1991Ligament>
 				<Blankevoort1991Ligament name="pCAP1">
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
@@ -13400,7 +12750,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13444,7 +12794,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13488,7 +12838,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13532,7 +12882,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13576,7 +12926,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13620,7 +12970,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13664,7 +13014,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13708,7 +13058,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13749,7 +13099,7 @@
 						<!--Default appearance attributes for this GeometryPath-->
 						<Appearance>
 							<!--Flag indicating whether the associated Geometry is visible or hidden.-->
-							<visible>true</visible>
+							<visible>false</visible>
 							<!--The color, (red, green, blue), [0, 1], used to display the geometry. -->
 							<color>0.1202 0.70540000000000003 0.1318</color>
 						</Appearance>
@@ -13765,9 +13115,9 @@
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
 					<appliesForce>true</appliesForce>
 					<!--Path to a Component that satisfies the Socket 'target_mesh' of type Smith2018ContactMesh (description: Target mesh for collision detection.).-->
-					<socket_target_mesh>/contactgeometryset/femur_cartilage</socket_target_mesh>
+					<socket_target_mesh>/contactgeometryset/femur_implant</socket_target_mesh>
 					<!--Path to a Component that satisfies the Socket 'casting_mesh' of type Smith2018ContactMesh (description: Ray casting mesh for collision detection.).-->
-					<socket_casting_mesh>/contactgeometryset/tibia_cartilage</socket_casting_mesh>
+					<socket_casting_mesh>/contactgeometryset/tibia_implant</socket_casting_mesh>
 					<!--The minimum proximity that is valid between contacting meshes to limit the search distance along the casting_mesh normal ray used for collision detection. Note this can be negative if proximity maps should include triangles that are not in contact.Default value set to 0.0 meters.-->
 					<min_proximity>0</min_proximity>
 					<!--The maximum proximity that is valid between contacting meshes to limit the search distance along the casting_mesh normal ray used for collision detection.Default value set to 0.01 meters.-->
@@ -13783,9 +13133,9 @@
 					<!--Flag indicating whether the force is applied or not. If true the forceis applied to the MultibodySystem otherwise the force is not applied.NOTE: Prior to OpenSim 4.0, this behavior was controlled by the 'isDisabled' property, where 'true' meant that force was not being applied. Thus, if 'isDisabled' is true, then 'appliesForce` is false.-->
 					<appliesForce>true</appliesForce>
 					<!--Path to a Component that satisfies the Socket 'target_mesh' of type Smith2018ContactMesh (description: Target mesh for collision detection.).-->
-					<socket_target_mesh>/contactgeometryset/femur_cartilage</socket_target_mesh>
+					<socket_target_mesh>/contactgeometryset/femur_implant</socket_target_mesh>
 					<!--Path to a Component that satisfies the Socket 'casting_mesh' of type Smith2018ContactMesh (description: Ray casting mesh for collision detection.).-->
-					<socket_casting_mesh>/contactgeometryset/patella_cartilage</socket_casting_mesh>
+					<socket_casting_mesh>/contactgeometryset/patella_implant</socket_casting_mesh>
 					<!--The minimum proximity that is valid between contacting meshes to limit the search distance along the casting_mesh normal ray used for collision detection. Note this can be negative if proximity maps should include triangles that are not in contact.Default value set to 0.0 meters.-->
 					<min_proximity>0</min_proximity>
 					<!--The maximum proximity that is valid between contacting meshes to limit the search distance along the casting_mesh normal ray used for collision detection.Default value set to 0.01 meters.-->
@@ -14326,7 +13676,7 @@
 		<!--Geometry to be used in contact forces.-->
 		<ContactGeometrySet name="contactgeometryset">
 			<objects>
-				<Smith2018ContactMesh name="femur_cartilage">
+				<Smith2018ContactMesh name="femur_implant">
 					<!--List of components that this component owns and serializes.-->
 					<components />
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
@@ -14370,7 +13720,7 @@
 					<!--[x,y,z] scale factors applied to vertex locations of the mesh_file and mesh_back_file meshes.-->
 					<scale_factors>1 1 1</scale_factors>
 				</Smith2018ContactMesh>
-				<Smith2018ContactMesh name="tibia_cartilage">
+				<Smith2018ContactMesh name="tibia_implant">
 					<!--List of components that this component owns and serializes.-->
 					<components />
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->
@@ -14414,7 +13764,7 @@
 					<!--[x,y,z] scale factors applied to vertex locations of the mesh_file and mesh_back_file meshes.-->
 					<scale_factors>1 1 1</scale_factors>
 				</Smith2018ContactMesh>
-				<Smith2018ContactMesh name="patella_cartilage">
+				<Smith2018ContactMesh name="patella_implant">
 					<!--List of components that this component owns and serializes.-->
 					<components />
 					<!--Path to a Component that satisfies the Socket 'frame' of type PhysicalFrame (description: The frame to which this geometry is attached.).-->

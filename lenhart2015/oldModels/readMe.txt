@@ -1,0 +1,1 @@
+lenhart2015_unchangedModel = model from Colin Smith's github with no changes to it (as opposed to lenhart2015 in folder above where knee muscles and some stiffness values are changed)

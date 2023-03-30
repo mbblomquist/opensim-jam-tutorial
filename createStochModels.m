@@ -16,6 +16,7 @@
 % -----------------
 % v1    2020-08-17(JDR)     inital release
 % v2    2022-11-27(MBB)     updated to be a function
+% v3    2023-03-28(MBB)     Update code for local or HT (MBB)
 %
 %==========================================================================
 function StochMdlParams = createStochModels( Params )
@@ -23,20 +24,20 @@ function StochMdlParams = createStochModels( Params )
 %% Extract Params structure
 %--------------------------
 
-numModels = Params.numModels ;
-ligNames = Params.ligNamesToChange ;
 ligProps = Params.ligPropsToChange ;
 probDistType = Params.probDistType ;
 probDistRef = Params.probDistRef ;
 probDistParams = Params.probDistParams ;
 
+% Use nested function to create ligNames
+ligNames = findLigNames( Params ) ;
 
 %% Generate stochastic model parameters
 %--------------------------------------
 
 % Loop through each model, ligament, and property to create stochastic
 % model values
-for iMdl = 1 : numModels
+for iMdl = 1 : Params.numModels
     for iLig = 1 : length( ligNames )
         for iProp = 1 : length( ligProps )
 
@@ -90,24 +91,8 @@ for iFrc = 0 : model.getForceSet.getSize( ) - 1
     clear force
 end % for iFrc
 
-% Deletes files in stochModels folder if there are files in it
-filesInStochModels = dir( 'stochModels' ) ;
-numFiles = size( filesInStochModels , 1 ) ;
-for iFile = 1 : numFiles
-    if ~strcmp( filesInStochModels(iFile).name , '.' )
-        if ~strcmp( filesInStochModels(iFile).name , '..' )
-            if ~strcmp( filesInStochModels(iFile).name , 'Geometry' )
-                delete( fullfile( 'stochModels' , filesInStochModels(iFile).name ) ) ;
-            end
-        end
-    end
-end
-
-stochModelDir = Params.fileOut ;
-
 % Go through each model to set new parameters
-for iMdl = 1 : numModels
-
+for iMdl = 1 : Params.numModels
     stochModel = Model( model ) ; % Creates a copy of template model
 
     % Loop through ligament and strand to get force
@@ -148,18 +133,51 @@ for iMdl = 1 : numModels
     end % for iLig
 
     stochModel.initSystem();
-    stochModelName = [ 'lenhart2015_stoch' , num2str(iMdl) , '.osim' ] ;
+
+    % Set up output files for local or HT running
+    switch Params.localOrHT
+        case 'local'
+            outDir = fullfile( Params.baseOutDir , 'stochModels' ) ;
+            stochModelName = [ 'lenhart2015_stoch' , num2str(iMdl) , '.osim' ] ;
+            saveFileDir = outDir ;
+        case 'HT'
+            outDir = fullfile( Params.baseOutDir , 'input' , num2str(iMdl-1) ) ; % Specify output directory
+            stochModelName = 'lenhart2015_stoch.osim' ;
+            saveFileDir = Params.baseOutDir ;
+    end
+
+    stochModelFile = fullfile( outDir , stochModelName ) ;
     stochModel.print( stochModelName ) ;
-    stochModelFile = fullfile( stochModelDir, stochModelName ) ;
     movefile( stochModelName , stochModelFile )
     clear stochModel
     disp( [ 'Wrote model to: ', stochModelFile ] )
 end
 
-save( fullfile( stochModelDir , 'stochMdlParams.mat' ) , 'StochMdlParams' )
+save( fullfile( saveFileDir , 'stochMdlParams.mat' ) , 'StochMdlParams' )
 
 doneMsg = 'Done creating models' ;
 disp( doneMsg )
 
+
+end
+
+%% ========================== NESTED FUNCTIONS ===========================
+% ========================================================================
+
+function ligNames = findLigNames( Params )
+
+    if contains( Params.ligNamesToChange , 'allLigs' )
+        switch Params.baseMdl
+            case 'lenhart2015'
+                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
+                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
+                    'lPFL', 'mPFL' } ;
+            case 'lenhart2015_implant'
+                ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
+                    'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
+        end
+    else
+        ligNames = Params.ligNamesToChange ;
+    end
 
 end

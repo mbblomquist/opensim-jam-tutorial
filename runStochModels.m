@@ -52,7 +52,7 @@ switch Params.localOrHT
         % I would do it outside of this folder because it's too many files
         % for git to track. I usually create them in a folder on my
         % desktop, but another folder in documents works as well
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testNewCode2' ;
+        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testNewCode5' ;
         % Also specify which study ID for BAM lab work (not too important,
         % but this is what some files will have for a prefix in their name)
         Params.studyId = 'bam014' ;
@@ -147,18 +147,18 @@ end
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'var' , 'val' } ;
+Params.testDOFs = { 'var' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, you can leave blank
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 0 , 20 } ;
+Params.kneeFlexAngles = { 0 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 10 , 10 } ;
+Params.externalLoads = { 10 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -759,6 +759,7 @@ switch Params.localOrHT
             % ----------------
             % Tar shared files
             % ----------------
+            Params.opensimLibTarName = 'opensim-jam.tar.gz' ;
             Params.sharedTarName = 'shared.tar.gz' ;
             Params.sharedDir = fullfile( Params.baseOutDir , Params.tempTestDOF , 'shared' ) ;
 

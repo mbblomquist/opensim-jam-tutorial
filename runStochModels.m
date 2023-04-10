@@ -38,7 +38,7 @@ import org.opensim.modeling.*
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'HT' ;
+Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
@@ -52,7 +52,7 @@ switch Params.localOrHT
         % I would do it outside of this folder because it's too many files
         % for git to track. I usually create them in a folder on my
         % desktop, but another folder in documents works as well
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testNewCode5' ;
+        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testLatModels' ;
         % Also specify which study ID for BAM lab work (not too important,
         % but this is what some files will have for a prefix in their name)
         Params.studyId = 'bam014' ;
@@ -63,7 +63,7 @@ end
 % ------------------------------------------------------------------------
 
 % Number of models to create and run
-Params.numModels = 10 ;
+Params.numModels = 1 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
@@ -99,7 +99,7 @@ Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
 %   For 'uniform': [ <lower_limit> , <upper_limit> ]
 %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
 %       the baseline model value
-Params.probDistParams = { [ 0, 0 ] , [ 0 , 0 ] } ;
+Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -109,6 +109,19 @@ Params.probDistParams = { [ 0, 0 ] , [ 0 , 0 ] } ;
 % lenhart2015_implant
 switch Params.baseMdl
     case 'lenhart2015_implant'
+
+        % Copy models from another folder Yes or No
+        %   If Yes, specify which folder to copy models from. This will
+        %   enable you to create models with different ligament properties,
+        %   then alter the implant alignment to overstuff in one direction,
+        %   then change to overstuff in the other direction
+        copyModelsYesNo = 'No' ;
+
+        % If copy models, which folder are the models from
+        switch copyModelsYesNo
+            case 'Yes'
+                fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testRefModels' ;
+        end
 
         % Femur and tibia implant names
         Params.femImplant = 'femur_component_surface_gc_katka-lenhart_updated.stl' ;
@@ -124,11 +137,23 @@ switch Params.baseMdl
         % Specify lower and upper limits (if uniform) or mean and std (if
         % normal) for femur and tibia Varus-valgus and internal-external
         % rotation of implants. Comment out the sections if you don't want
-        % to malalign in that degree of freedom. NOTE: All values in deg
-        Params.femRot.vv = [ -2 , 2 ] ;
-        % Params.femRot.ie = [ -2 , 0 ] ;
-        Params.tibRot.vv = [ -2 , 2 ] ;
-        % Params.tibRot.ie = [ 0 2 ] ;
+        % to malalign in that degree of freedom
+        % NOTE: All values in deg
+        % Reference models (no overstuff), set refModels = 'Yes' ;
+        % If you want overstuff, then set refModels = 'No' ;
+        refModelsYesNo = 'No' ;
+        % Medial overstuff 
+        %   Femur (VV): [ 0 , 2 ], (IE): [ -2 , 0 ]
+        %   Tibia (VV): [ -2 , 0 ]
+        % Lateral overstuff
+        %   Femur (VV): [ -2 , 0 ], (IE): [ 0 , 2 ]
+        %   Tibia (VV): [ 0 , 2 ]
+        if isequal( refModelsYesNo , 'No' )
+            Params.femRot.vv = [ -2 , 0 ] ;
+            Params.femRot.ie = [ 0 , 2 ] ;
+            Params.tibRot.vv = [ 0 , 2 ] ;
+            % Params.tibRot.ie = [ 0 2 ] ;
+        end
 end
 
 % ------------------------------------------------------------------------
@@ -206,9 +231,8 @@ Params.numTrials = length( Params.trialNames ) ;
 
 clear trialCounter iDOF iAng
 
-%% ======================== Create Stoch Models ==========================
-% Sets up folders to put models and executables, then create stochastic
-% models (and implants if applicable) and put them in desired output folder
+%% ========================== Set up folders =============================
+% Sets up folders to put models and executables
 % ========================================================================
 Params.baseMdlFile = fullfile( pwd , 'lenhart2015' , [ Params.baseMdl , '.osim' ] ) ;
 
@@ -287,9 +311,15 @@ end
 % ========================================================================
 
 % Run createStochMalalignMdl code if running implant code
-switch Params.baseMdl
-    case 'lenhart2015_implant'
+if isequal( Params.baseMdl , 'lenhart2015_implant' )
+    if isequal( refModelsYesNo , 'No' )
         doneMsg = createStochMalalignMdl( Params ) ;
+    else
+        % If they are ref models, then copy the implant STLs to be in the
+        % shared directory
+        copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+        copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+    end
 end
 
 % Create Stochastic models
@@ -655,11 +685,11 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_unconstrained_coordinates( 8 , '/jointset/pf_r/pf_tx_r' ) ;
                 forsim.set_unconstrained_coordinates( 9 , '/jointset/pf_r/pf_ty_r' ) ;
                 forsim.set_unconstrained_coordinates( 10 , '/jointset/pf_r/pf_tz_r' ) ;
-                forsim.set_prescribed_coordinates_file( [ 'prescribed_coordinates_' , tempTrialName , '.sto' ] ) ;
+                forsim.set_prescribed_coordinates_file( fullfile( 'inputs' , [ 'prescribed_coordinates_' , tempTrialName , '.sto' ] ) ) ;
                 if strcmp( tempDOF , 'flex' ) % passive flexion
                     forsim.set_external_loads_file( '' ) ;
                 else % laxity test
-                    forsim.set_external_loads_file( [ 'external_loads_' , tempTrialName , '.xml' ] ) ;
+                    forsim.set_external_loads_file( fullfile( 'inputs' , [ 'external_loads_' , tempTrialName , '.xml' ] ) ) ;
                 end
                 forsim.set_use_visualizer( false ) ; % use visualizer while running (true or false)
                 forsim.print( fullfile( pwd , 'inputs' , forsimSettingsFileName ) ) ;

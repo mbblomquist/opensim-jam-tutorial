@@ -173,16 +173,3 @@ clear trialCounter iDOF iAng
 %% Run processLocalSims
 %----------------------
 simData = batchProcessSims( Params ) ;
-
-%% Analyze Data
-% ADD CODE HERE TO ANALYZE DATA THAT YOU WANT TO ANALYZE
-
-kineNames = fieldnames( simData.lax_var_frc10_0.kine.tf ) ;
-
-
-figure() ; hold on ;
-title( 'Activation Dynamics = No, Tendon Compliance = No, Muscle Physiology = Yes' , 'Time = 51 seconds')
-for i = 2 : 6
-    plot( simData.lax_var_frc10_0.kine.tf.( kineNames{i} )(:,9) )
-end
-legend( kineNames(2:6) )

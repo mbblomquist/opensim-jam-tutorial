@@ -43,7 +43,7 @@ switch Params.localOrHT
     case 'HT'
         % IF RUNNING ON CHTC, CHANGE THIS TO THE PLACE THE FILES WERE
         % CREATED
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testNewCode2' ;
+        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testTendComp3' ;
         % Name of results file (no need to change this)
         Params.resultsTarFile = 'results.tar.gz' ;
 end
@@ -60,7 +60,8 @@ Params.numModels = 10 ;
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
-Params.baseMdl = 'lenhart2015' ;
+%       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
+Params.baseMdl = 'lenhart2015_implant' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -78,7 +79,7 @@ Params.muscleNames = { 'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' , ...
 
 % Muscle properties
 %   Options: { 'force' , 'fiber_length' }
-Params.muscleProperties = { 'force' , 'fiber_length' } ;
+Params.muscleProperties = { 'force' } ;
 
 % Ligament names
 %   Options: 'allLigs' to extract data on all of the ligaments in the model
@@ -131,7 +132,7 @@ Params.testDOFs = { 'var' } ;
 %   For passive flexion, you can leave blank
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 0 , 20 } ;
+Params.kneeFlexAngles = { 0 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
@@ -175,3 +176,13 @@ simData = batchProcessSims( Params ) ;
 
 %% Analyze Data
 % ADD CODE HERE TO ANALYZE DATA THAT YOU WANT TO ANALYZE
+
+kineNames = fieldnames( simData.lax_var_frc10_0.kine.tf ) ;
+
+
+figure() ; hold on ;
+title( 'Activation Dynamics = No, Tendon Compliance = No, Muscle Physiology = Yes' , 'Time = 51 seconds')
+for i = 2 : 6
+    plot( simData.lax_var_frc10_0.kine.tf.( kineNames{i} )(:,9) )
+end
+legend( kineNames(2:6) )

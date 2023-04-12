@@ -60,240 +60,247 @@ for iMdl = 1 : Params.numModels
         end
 
 
+        try
 
 
-        % Use read_opensim_mot function to read .sto files
-        [ tempData.kine.data, tempData.kine.labels, tempData.kine.header ] = ...
-            read_opensim_mot( fullfile( resultsDir, laxResultFile ) ) ; % Kinematics files
-        [ tempData.frc.data, tempData.frc.labels, tempData.frc.header ] = ...
-            read_opensim_mot( fullfile( resultsDir, frcResultsFile ) ) ; % Force files
+            % Use read_opensim_mot function to read .sto files
+            [ tempData.kine.data, tempData.kine.labels, tempData.kine.header ] = ...
+                read_opensim_mot( fullfile( resultsDir, laxResultFile ) ) ; % Kinematics files
+            [ tempData.frc.data, tempData.frc.labels, tempData.frc.header ] = ...
+                read_opensim_mot( fullfile( resultsDir, frcResultsFile ) ) ; % Force files
 
-        % Find indices for each trial
-        StoData.idx = parseOpenSimSto( tempData, Params ) ;
+            % Find indices for each trial
+            StoData.idx = parseOpenSimSto( tempData, Params ) ;
 
-        %============%
-        % Kinematics %
-        %============%
-        if isfield( StoData.idx , 'kine' ) % Make sure kinematics is a field
+            %============%
+            % Kinematics %
+            %============%
+            if isfield( StoData.idx , 'kine' ) % Make sure kinematics is a field
 
-            % Loop through joints
-            joints = fieldnames( StoData.idx.kine ) ;
-            for iJoint = 1 : length( joints )
+                % Loop through joints
+                joints = fieldnames( StoData.idx.kine ) ;
+                for iJoint = 1 : length( joints )
 
-                % Switch extracting data based on joint
-                switch joints{ iJoint }
-                    case 'tf'
+                    % Switch extracting data based on joint
+                    switch joints{ iJoint }
+                        case 'tf'
 
-                        % Fieldnames of the tibiofemoral degrees of freedom
-                        kineDofs = fieldnames( StoData.idx.kine.tf ) ;
+                            % Fieldnames of the tibiofemoral degrees of freedom
+                            kineDofs = fieldnames( StoData.idx.kine.tf ) ;
 
-                        % Loop through degrees of freedom
-                        for iDof = 1 : length( kineDofs )
-                            tempDof = kineDofs{ iDof } ;
+                            % Loop through degrees of freedom
+                            for iDof = 1 : length( kineDofs )
+                                tempDof = kineDofs{ iDof } ;
 
-                            % Convert data separately based on DOF
-                            switch tempDof
-                                case { 'vv' , 'ie' , 'fe' } % rotation values
-                                    scaleFactor = 180 / pi() ; % radians to degrees
-                                    StoData.( trialNames{ iTrial } ).kine.tf.( tempDof )( : , iMdl ) = ...
-                                        tempData.kine.data( : , StoData.idx.kine.tf.(tempDof) ) * scaleFactor ;
+                                % Convert data separately based on DOF
+                                switch tempDof
+                                    case { 'vv' , 'ie' , 'fe' } % rotation values
+                                        scaleFactor = 180 / pi() ; % radians to degrees
+                                        StoData.( trialNames{ iTrial } ).kine.tf.( tempDof )( : , iMdl ) = ...
+                                            tempData.kine.data( : , StoData.idx.kine.tf.(tempDof) ) * scaleFactor ;
 
-                                case { 'ap' , 'pd' , 'ml' }
-                                    scaleFactor = 1000 ; % m to mm
-                                    % For translations, we need to account for which
-                                    %   flexion angle the knee is at and apply
-                                    %   a rotation matrix to it
-                                    flexAngles = StoData.( trialNames{ iTrial } ).kine.tf.fe( : , iMdl ) ;
-                                    numFlexAngles = length( flexAngles ) ;
+                                    case { 'ap' , 'pd' , 'ml' }
+                                        scaleFactor = 1000 ; % m to mm
+                                        % For translations, we need to account for which
+                                        %   flexion angle the knee is at and apply
+                                        %   a rotation matrix to it
+                                        flexAngles = StoData.( trialNames{ iTrial } ).kine.tf.fe( : , iMdl ) ;
+                                        numFlexAngles = length( flexAngles ) ;
 
-                                    switch tempDof
-                                        case 'ap'
-                                            axisNum = 1 ; % x axis
-                                        case 'pd'
-                                            axisNum = 2 ; % y axis
-                                        case 'ml'
-                                            axisNum = 3 ; % z axis
-                                    end
+                                        switch tempDof
+                                            case 'ap'
+                                                axisNum = 1 ; % x axis
+                                            case 'pd'
+                                                axisNum = 2 ; % y axis
+                                            case 'ml'
+                                                axisNum = 3 ; % z axis
+                                        end
 
-                                    newTransValues = zeros( numFlexAngles , 1 ) ; % initialize
+                                        newTransValues = zeros( numFlexAngles , 1 ) ; % initialize
 
-                                    % Loop through flexion angles
-                                    for iAngle = 1 : numFlexAngles
-                                        % Create rotation matrix based on flexion angle
-                                        rotMatrix = ...
-                                            [   cosd( flexAngles( iAngle ) )  -sind( flexAngles( iAngle ) ) 0 ; ...
-                                            sind( flexAngles( iAngle ) )  cosd( flexAngles( iAngle ) )  0 ; ...
-                                            0               0               1 ] ;
+                                        % Loop through flexion angles
+                                        for iAngle = 1 : numFlexAngles
+                                            % Create rotation matrix based on flexion angle
+                                            rotMatrix = ...
+                                                [   cosd( flexAngles( iAngle ) )  -sind( flexAngles( iAngle ) ) 0 ; ...
+                                                sind( flexAngles( iAngle ) )  cosd( flexAngles( iAngle ) )  0 ; ...
+                                                0               0               1 ] ;
 
-                                        % Create vector of translations from OpenSim
-                                        transValues = [ tempData.kine.data( iAngle , StoData.idx.kine.tf.ap ) ; ...
-                                            tempData.kine.data( iAngle , StoData.idx.kine.tf.pd ) ; ...
-                                            tempData.kine.data( iAngle , StoData.idx.kine.tf.ml ) ] ;
+                                            % Create vector of translations from OpenSim
+                                            transValues = [ tempData.kine.data( iAngle , StoData.idx.kine.tf.ap ) ; ...
+                                                tempData.kine.data( iAngle , StoData.idx.kine.tf.pd ) ; ...
+                                                tempData.kine.data( iAngle , StoData.idx.kine.tf.ml ) ] ;
 
-                                        % Compute new translation values
-                                        tempValues = rotMatrix * transValues ;
+                                            % Compute new translation values
+                                            tempValues = rotMatrix * transValues ;
 
-                                        % Extract DOF of interest
-                                        newTransValues( iAngle , 1 ) = tempValues( axisNum ) ;
-                                    end % iAngle
+                                            % Extract DOF of interest
+                                            newTransValues( iAngle , 1 ) = tempValues( axisNum ) ;
+                                        end % iAngle
 
-                                    % Add to structure
-                                    StoData.( trialNames{ iTrial } ).kine.tf.( tempDof )( : , iMdl ) = ...
-                                        scaleFactor * ( newTransValues ) ;
+                                        % Add to structure
+                                        StoData.( trialNames{ iTrial } ).kine.tf.( tempDof )( : , iMdl ) = ...
+                                            scaleFactor * ( newTransValues ) ;
 
-                            end % switch tempDofName
-                        end % for tempDof
+                                end % switch tempDofName
+                            end % for tempDof
 
-                    case 'pf'
-                        % ===========================================
-                        % MIGHT NEED TO CHANGE THIS
-                        %   Also, need to add offsets of translations
-                        % ===========================================
+                        case 'pf'
+                            % ===========================================
+                            % MIGHT NEED TO CHANGE THIS
+                            %   Also, need to add offsets of translations
+                            % ===========================================
 
-                        % Fieldnames of the patellofemoral degrees of freedom
-                        kineDofs = fieldnames( StoData.idx.kine.pf ) ;
+                            % Fieldnames of the patellofemoral degrees of freedom
+                            kineDofs = fieldnames( StoData.idx.kine.pf ) ;
 
-                        for iDof = 1 : length( kineDofs )
-                            tempDof = kineDofs{ iDof } ;
+                            for iDof = 1 : length( kineDofs )
+                                tempDof = kineDofs{ iDof } ;
 
-                            StoData.( trialNames{ iTrial } ).kine.pf.( tempDof )( : , iMdl ) = ...
-                                tempData.kine.data( : , StoData.idx.kine.pf.(tempDof) ) ;
+                                StoData.( trialNames{ iTrial } ).kine.pf.( tempDof )( : , iMdl ) = ...
+                                    tempData.kine.data( : , StoData.idx.kine.pf.(tempDof) ) ;
 
-                        end % for iDof
+                            end % for iDof
 
-                end % switch joints{ iJoint }
-            end % for iJoint
-        end % if isField
+                    end % switch joints{ iJoint }
+                end % for iJoint
+            end % if isField
 
-        %=============%
-        % Muscle data %
-        %=============%
+            %=============%
+            % Muscle data %
+            %=============%
 
-        if isfield( StoData.idx , 'msl' ) % Make sure muscles are a field
-            mslNames = fieldnames( StoData.idx.msl ) ;
-            mslProp = fieldnames( StoData.idx.msl.( mslNames{1} ) ) ;
+            if isfield( StoData.idx , 'msl' ) % Make sure muscles are a field
+                mslNames = fieldnames( StoData.idx.msl ) ;
+                mslProp = fieldnames( StoData.idx.msl.( mslNames{1} ) ) ;
 
-            % Loop through muscles
-            for iMsl = 1 : length( mslNames )
-                tempMslName = mslNames{ iMsl } ;
+                % Loop through muscles
+                for iMsl = 1 : length( mslNames )
+                    tempMslName = mslNames{ iMsl } ;
 
-                % Loop through muscle properties
-                for iProp = 1 : length( mslProp )
+                    % Loop through muscle properties
+                    for iProp = 1 : length( mslProp )
 
-                    switch mslProp{ iProp }
-                        case 'force' % extract from tempData.frc
-                            StoData.( trialNames{ iTrial } ).msl.( tempMslName ).frc( : , iMdl ) = ...
-                                tempData.frc.data( : , StoData.idx.msl.( tempMslName ).force ) ; % muscle force
-                        case 'fiber_length' % extract from tempData.kine
-                            StoData.( trialNames{ iTrial } ).msl.( tempMslName ).length( : , iMdl ) = ...
-                                tempData.kine.data( : , StoData.idx.msl.( tempMslName ).fiber_length ) ; % muscle fiber length
-                    end % switch mslProp{iProp}
+                        switch mslProp{ iProp }
+                            case 'force' % extract from tempData.frc
+                                StoData.( trialNames{ iTrial } ).msl.( tempMslName ).frc( : , iMdl ) = ...
+                                    tempData.frc.data( : , StoData.idx.msl.( tempMslName ).force ) ; % muscle force
+                            case 'fiber_length' % extract from tempData.kine
+                                StoData.( trialNames{ iTrial } ).msl.( tempMslName ).length( : , iMdl ) = ...
+                                    tempData.kine.data( : , StoData.idx.msl.( tempMslName ).fiber_length ) ; % muscle fiber length
+                        end % switch mslProp{iProp}
 
-                end % for iProp
-            end % iMsl
-        end % isfield
+                    end % for iProp
+                end % iMsl
+            end % isfield
 
-        %===============%
-        % Ligament data %
-        %===============%
+            %===============%
+            % Ligament data %
+            %===============%
 
-        if isfield( StoData.idx , 'lig' ) % Make sure ligaments are a field
-            ligNames = fieldnames( StoData.idx.lig ) ;
-            ligProp = fieldnames( StoData.idx.lig.( ligNames{1} ) ) ;
+            if isfield( StoData.idx , 'lig' ) % Make sure ligaments are a field
+                ligNames = fieldnames( StoData.idx.lig ) ;
+                ligProp = fieldnames( StoData.idx.lig.( ligNames{1} ) ) ;
 
-            % Loop through ligaments
-            for iLig = 1 : length( ligNames )
-                tempLigName = ligNames{ iLig } ;
-                tempNumStrands = size( StoData.idx.lig.( ligNames{ iLig } ).( ligProp{ 1 } ) , 1 ) ;
+                % Loop through ligaments
+                for iLig = 1 : length( ligNames )
+                    tempLigName = ligNames{ iLig } ;
+                    tempNumStrands = size( StoData.idx.lig.( ligNames{ iLig } ).( ligProp{ 1 } ) , 1 ) ;
 
-                % Loop through ligament properties
-                for iProp = 1 : length( ligProp )
-                    tempProp = ligProp{ iProp } ;
-                    for iStrand = 1 : tempNumStrands
-                        StoData.( trialNames{ iTrial } ).lig.( tempLigName ).( [ 'strand' , num2str( iStrand ) ] ).( tempProp )( : , iMdl ) = ...
-                            tempData.frc.data( : , StoData.idx.lig.( ligNames{ iLig } ).( tempProp )( iStrand ) ) ;
+                    % Loop through ligament properties
+                    for iProp = 1 : length( ligProp )
+                        tempProp = ligProp{ iProp } ;
+                        for iStrand = 1 : tempNumStrands
+                            StoData.( trialNames{ iTrial } ).lig.( tempLigName ).( [ 'strand' , num2str( iStrand ) ] ).( tempProp )( : , iMdl ) = ...
+                                tempData.frc.data( : , StoData.idx.lig.( ligNames{ iLig } ).( tempProp )( iStrand ) ) ;
 
-                        % Add data for addition structure to compute allStrands value
-                        tempLigData.( tempProp )( : , iStrand ) = ...
-                            StoData.( trialNames{ iTrial } ).lig.( tempLigName ).( [ 'strand' , num2str( iStrand ) ] ).( tempProp )( : , iMdl ) ;
-                    end
+                            % Add data for addition structure to compute allStrands value
+                            tempLigData.( tempProp )( : , iStrand ) = ...
+                                StoData.( trialNames{ iTrial } ).lig.( tempLigName ).( [ 'strand' , num2str( iStrand ) ] ).( tempProp )( : , iMdl ) ;
+                        end
 
-                    % Sum or average (depending on property) to get one value for ligament (allStrands)
-                    if contains( tempProp , 'force' ) % Sum the force_total, force_damping, or force_spring
-                        StoData.( trialNames{ iTrial } ).lig.( tempLigName ).allStrands.( tempProp )( : , iMdl ) = ...
-                            sum( tempLigData.( tempProp ) , 2 ) ;
-                    else % Average the length, lengthening_speed, strain, strain_rate
-                        StoData.( trialNames{ iTrial } ).lig.( tempLigName ).allStrands.( tempProp )( : , iMdl ) = ...
-                            mean( tempLigData.( tempProp ) , 2 ) ;
-                    end % if contains
+                        % Sum or average (depending on property) to get one value for ligament (allStrands)
+                        if contains( tempProp , 'force' ) % Sum the force_total, force_damping, or force_spring
+                            StoData.( trialNames{ iTrial } ).lig.( tempLigName ).allStrands.( tempProp )( : , iMdl ) = ...
+                                sum( tempLigData.( tempProp ) , 2 ) ;
+                        else % Average the length, lengthening_speed, strain, strain_rate
+                            StoData.( trialNames{ iTrial } ).lig.( tempLigName ).allStrands.( tempProp )( : , iMdl ) = ...
+                                mean( tempLigData.( tempProp ) , 2 ) ;
+                        end % if contains
 
-                end % for iProp
+                    end % for iProp
 
-                clear tempLigData
+                    clear tempLigData
 
-            end % for iLig
-        end % isfield
+                end % for iLig
+            end % isfield
 
-        %====================%
-        % Contact force data %
-        %====================%
+            %====================%
+            % Contact force data %
+            %====================%
 
-        if isfield( StoData.idx , 'cnt' ) % Make sure cnt are a field
-            compNames = fieldnames( StoData.idx.cnt ) ;
-            cntLoadNames = fieldnames( StoData.idx.cnt.( compNames{1} ) ) ;
+            if isfield( StoData.idx , 'cnt' ) % Make sure cnt are a field
+                compNames = fieldnames( StoData.idx.cnt ) ;
+                cntLoadNames = fieldnames( StoData.idx.cnt.( compNames{1} ) ) ;
 
-            % Loop through contact compartments
-            for iCntComp = 1 : length( compNames )
+                % Loop through contact compartments
+                for iCntComp = 1 : length( compNames )
 
-                % Loop through contact loads
-                for iCntLoad = 1 : length( cntLoadNames )
-                    StoData.( trialNames{ iTrial } ).cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } )( : , iMdl ) = ...
-                        tempData.frc.data( : , StoData.idx.cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } ) ) ;
+                    % Loop through contact loads
+                    for iCntLoad = 1 : length( cntLoadNames )
+                        StoData.( trialNames{ iTrial } ).cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } )( : , iMdl ) = ...
+                            tempData.frc.data( : , StoData.idx.cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } ) ) ;
 
-                end % for iCntLoad
-            end % for iCntComp
-        end % isfield
+                    end % for iCntLoad
+                end % for iCntComp
+            end % isfield
 
-        %====================%
-        % External load data %
-        %====================%
+            %====================%
+            % External load data %
+            %====================%
 
-        if isfield( StoData.idx , 'extLoad' )
-            extLoads = fieldnames( StoData.idx.extLoad ) ;
+            if isfield( StoData.idx , 'extLoad' )
+                extLoads = fieldnames( StoData.idx.extLoad ) ;
 
-            % Loop through external load variables (forces, moments, force points)
-            for iExtLoad = 1 : length( extLoads )
-                tempExtLoadData.( extLoads{iExtLoad} ) = ...
-                    tempData.frc.data( : , StoData.idx.extLoad.( extLoads{iExtLoad} ) ) ;
+                % Loop through external load variables (forces, moments, force points)
+                for iExtLoad = 1 : length( extLoads )
+                    tempExtLoadData.( extLoads{iExtLoad} ) = ...
+                        tempData.frc.data( : , StoData.idx.extLoad.( extLoads{iExtLoad} ) ) ;
 
-            end % for iExtLoad
+                end % for iExtLoad
 
-            % Anterior-Posterior = forces
-            if contains( trialNames{ iTrial } , 'ant' ) || contains( trialNames{ iTrial } , 'post' )
-                StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
-                    sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) ;
+                % Anterior-Posterior = forces
+                if contains( trialNames{ iTrial } , 'ant' ) || contains( trialNames{ iTrial } , 'post' )
+                    StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
+                        sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) ;
 
-                % Varus-Valgus = forces * point load
-            elseif contains( trialNames{ iTrial } , 'var' ) || contains( trialNames{ iTrial } , 'val' )
-                StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
-                    sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) .* -tempExtLoadData.load_py ;
+                    % Varus-Valgus = forces * point load
+                elseif contains( trialNames{ iTrial } , 'var' ) || contains( trialNames{ iTrial } , 'val' )
+                    StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
+                        sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) .* -tempExtLoadData.load_py ;
 
-                % Internal-External Rotation = Moments
-            elseif contains( trialNames{ iTrial } , 'ir' ) || contains( trialNames{ iTrial } , 'er' )
-                StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
-                    sqrt( tempExtLoadData.load_Tx.^2 + tempExtLoadData.load_Ty.^2 + tempExtLoadData.load_Tz.^2 ) ;
+                    % Internal-External Rotation = Moments
+                elseif contains( trialNames{ iTrial } , 'ir' ) || contains( trialNames{ iTrial } , 'er' )
+                    StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
+                        sqrt( tempExtLoadData.load_Tx.^2 + tempExtLoadData.load_Ty.^2 + tempExtLoadData.load_Tz.^2 ) ;
 
-                % Distraction-Compression = Forces
-            elseif contains( trialNames{ iTrial } , 'dist' ) || contains( trialNames{ iTrial } , 'comp' )
-                StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
-                    sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) ;
+                    % Distraction-Compression = Forces
+                elseif contains( trialNames{ iTrial } , 'dist' ) || contains( trialNames{ iTrial } , 'comp' )
+                    StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = ...
+                        sqrt( tempExtLoadData.load_Fx.^2 + tempExtLoadData.load_Fy.^2 + tempExtLoadData.load_Fz.^2 ) ;
 
-                % Passive flexion = 0
-            elseif contains( trialNames{ iTrial } , 'flex' )
-                StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = 0 ;
-            end
+                    % Passive flexion = 0
+                elseif contains( trialNames{ iTrial } , 'flex' )
+                    StoData.( trialNames{ iTrial } ).extLoad( : , iMdl ) = 0 ;
+                end
 
-        end % isfield
+            end % isfield
+
+        catch
+
+            disp( [ 'No results for model number ' , num2str(iMdl-1) ] )
+
+        end
 
     end % for iTrial
 
@@ -439,7 +446,7 @@ for iCntComp = 1 : numCntComp
                 case 'pf_contact'
                     cart = 'patella_cartilage' ;
             end
-        case 'lenhart2015_implant'
+        case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
             % Specify which cartilage surface to find data from
             switch cntCompNames{ iCntComp }
                 case 'tf_contact'
@@ -638,18 +645,18 @@ end
 
 function ligNames = findLigNames( Params )
 
-    if contains( Params.ligamentNames , 'allLigs' )
-        switch Params.baseMdl
-            case 'lenhart2015'
-                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
-                    'lPFL', 'mPFL' } ;
-            case 'lenhart2015_implant'
-                ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
-                    'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
-        end
-    else
-        ligNames = Params.ligamentNames ;
+if contains( Params.ligamentNames , 'allLigs' )
+    switch Params.baseMdl
+        case { 'lenhart2015' , 'lenhart2015_BCRTKA' }
+            ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
+                'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
+                'lPFL', 'mPFL' } ;
+        case 'lenhart2015_implant'
+            ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
+                'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
     end
+else
+    ligNames = Params.ligamentNames ;
+end
 
 end

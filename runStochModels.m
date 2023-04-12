@@ -22,7 +22,7 @@
 clear ; close all ; clc ;
 
 import org.opensim.modeling.*
-% Logger.setLevelString( 'Info' ) ;
+Logger.setLevelString( 'Info' ) ;
 
 %% ======================= Specify Settings ===========================
 % Look through this entire section to change parameters to whatever you
@@ -52,7 +52,7 @@ switch Params.localOrHT
         % I would do it outside of this folder because it's too many files
         % for git to track. I usually create them in a folder on my
         % desktop, but another folder in documents works as well
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testLatModels' ;
+        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testTendComp3' ;
         % Also specify which study ID for BAM lab work (not too important,
         % but this is what some files will have for a prefix in their name)
         Params.studyId = 'bam014' ;
@@ -69,7 +69,8 @@ Params.numModels = 1 ;
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
-Params.baseMdl = 'lenhart2015' ;
+%       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
+Params.baseMdl = 'lenhart2015_implant' ;
 
 % Names of ligaments to change
 %   Options: 'allLigs' to change all the ligaments in the model
@@ -99,7 +100,7 @@ Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
 %   For 'uniform': [ <lower_limit> , <upper_limit> ]
 %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
 %       the baseline model value
-Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
+Params.probDistParams = { [ 0 , 0.3 ] , [ 0 , 0.05 ] } ;
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -108,7 +109,7 @@ Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
 % Only need to specify implant parameters if the model is
 % lenhart2015_implant
 switch Params.baseMdl
-    case 'lenhart2015_implant'
+    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
 
         % Copy models from another folder Yes or No
         %   If Yes, specify which folder to copy models from. This will
@@ -311,7 +312,7 @@ end
 % ========================================================================
 
 % Run createStochMalalignMdl code if running implant code
-if isequal( Params.baseMdl , 'lenhart2015_implant' )
+if isequal( Params.baseMdl , 'lenhart2015_implant' ) || isequal( Params.baseMdl , 'lenhart2015_BCRTKA' )
     if isequal( refModelsYesNo , 'No' )
         doneMsg = createStochMalalignMdl( Params ) ;
     else
@@ -630,7 +631,7 @@ for iTrial = 1 : Params.numTrials
                 % If implant model, then switch out stoch implants so that
                 % lenhart model reads the correct one
                 switch Params.baseMdl
-                    case 'lenhart2015_implant'
+                    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
                         tempStochFemName = [ Params.femImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
                         tempStochTibName = [ Params.tibImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
 
@@ -670,8 +671,8 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
                 forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
                 forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
-                forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
-                forsim.set_use_tendon_compliance( true ) ; % use tendon compliance
+                forsim.set_use_activation_dynamics( false ) ; % use activation dynamics
+                forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
                 forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
                 % Set all coordinates to be unconstrained except flexion-extension
                 forsim.set_unconstrained_coordinates( 0 , '/jointset/knee_r/knee_add_r' ) ;
@@ -701,7 +702,7 @@ for iTrial = 1 : Params.numTrials
 
                 % If implant model, then switch back names of implants
                 switch Params.baseMdl
-                    case 'lenhart2015_implant'
+                    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
                         movefile( fullfile( pwd , 'stochModels' , 'Geometry' , Params.femImplant ) , ...
                             fullfile( pwd , 'stochModels' , 'Geometry' , tempStochFemName ) )
                         movefile( fullfile( pwd , 'stochModels' , 'Geometry' , Params.tibImplant ) , ...
@@ -746,8 +747,8 @@ for iTrial = 1 : Params.numTrials
             forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
             forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
             forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
-            forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
-            forsim.set_use_tendon_compliance( true ) ; % use tendon compliance
+            forsim.set_use_activation_dynamics( false ) ; % use activation dynamics
+            forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
             forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
             % Set all coordinates to be unconstrained except flexion-extension
             forsim.set_unconstrained_coordinates( 0 , '/jointset/knee_r/knee_add_r' ) ;

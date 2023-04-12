@@ -168,7 +168,7 @@ function ligNames = findLigNames( Params )
 
     if contains( Params.ligNamesToChange , 'allLigs' )
         switch Params.baseMdl
-            case 'lenhart2015'
+            case { 'lenhart2015' , 'lenhart2015_BCRTKA' }
                 ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
                     'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
                     'lPFL', 'mPFL' } ;

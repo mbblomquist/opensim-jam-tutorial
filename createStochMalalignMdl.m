@@ -25,8 +25,17 @@ numMdls = Params.numModels ; % number of models to create
 femName = Params.femImplant ; % femur implant name
 tibName = Params.tibImplant ; % tibia implant name
 distType = Params.distType ; % distribution type
-femRot = Params.femRot ; % distribution parameters for femur
-tibRot = Params.tibRot ; % distribution parameters for tibia
+if isfield( Params , 'femRot' )
+    femRot = Params.femRot ; % distribution parameters for femur
+else
+    femRot = '' ;
+end
+if isfield( Params , 'tibRot' )
+    tibRot = Params.tibRot ; % distribution parameters for tibia
+else
+    tibRot = '' ;
+end
+
 
 %% Load articular surface models
 %===============================

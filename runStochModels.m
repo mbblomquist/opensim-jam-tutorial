@@ -7,7 +7,7 @@
 %
 % Purpose: To create and run models with stochastic parameters
 %
-% Output: Creates 1) executables to run forward simulations and 
+% Output: Creates 1) executables to run forward simulations and
 %   2) stochastic models with altered parameters
 %
 % Other .m files required:
@@ -42,28 +42,35 @@ Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
-switch Params.localOrHT
-    case 'local'
-        % You don't need to change this. The output directory is in the
-        % current directory (pwd = print working directory)
-        Params.baseOutDir = pwd ;
-    case 'HT'
-        % IF RUNNING ON CHTC, CHANGE THIS TO PLACE YOU WANT FILES TO GO
-        % I would do it outside of this folder because it's too many files
-        % for git to track. I usually create them in a folder on my
-        % desktop, but another folder in documents works as well
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testTendComp3' ;
-        % Also specify which study ID for BAM lab work (not too important,
-        % but this is what some files will have for a prefix in their name)
-        Params.studyId = 'bam014' ;
-end
+% I would do it outside of this folder because it's too many files
+% for git to track. I usually create them in a folder on my
+% desktop, but another folder in documents works as well
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
+% Also specify which study ID for BAM lab work (not too important,
+% but this is what some files will have for a prefix in their name)
+Params.studyId = 'bam014' ;
 
 % ------------------------------------------------------------------------
 % ----------------------- SPECIFY MODEL PARAMETERS -----------------------
 % ------------------------------------------------------------------------
 
+% Copy models from another folder Yes or No
+%   If 'Yes', specify which folder to copy models from. This will
+%   enable you to reuse models already created. For example, if you ran
+%   some laxity test on a given model set, but later decided you wanted to
+%   run more, then you can set this to 'Yes' to use the same model set
+copyModelsYesNo = 'Yes' ;
+switch copyModelsYesNo
+    case 'Yes'
+        % Specify the folder with the models. If you are saving the data in
+        % the same folder as Params.baseOutDir, then use this line:
+        %   fldWithModels = Params.baseOutDir
+        % Otherwise, specify which folder to copy from
+        fldWithModels = Params.baseOutDir ;
+end
+
 % Number of models to create and run
-Params.numModels = 1 ;
+Params.numModels = 2 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
@@ -100,7 +107,7 @@ Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
 %   For 'uniform': [ <lower_limit> , <upper_limit> ]
 %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
 %       the baseline model value
-Params.probDistParams = { [ 0 , 0.3 ] , [ 0 , 0.05 ] } ;
+Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -110,19 +117,6 @@ Params.probDistParams = { [ 0 , 0.3 ] , [ 0 , 0.05 ] } ;
 % lenhart2015_implant
 switch Params.baseMdl
     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
-
-        % Copy models from another folder Yes or No
-        %   If Yes, specify which folder to copy models from. This will
-        %   enable you to create models with different ligament properties,
-        %   then alter the implant alignment to overstuff in one direction,
-        %   then change to overstuff in the other direction
-        copyModelsYesNo = 'No' ;
-
-        % If copy models, which folder are the models from
-        switch copyModelsYesNo
-            case 'Yes'
-                fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testRefModels' ;
-        end
 
         % Femur and tibia implant names
         Params.femImplant = 'femur_component_surface_gc_katka-lenhart_updated.stl' ;
@@ -140,21 +134,18 @@ switch Params.baseMdl
         % rotation of implants. Comment out the sections if you don't want
         % to malalign in that degree of freedom
         % NOTE: All values in deg
-        % Reference models (no overstuff), set refModels = 'Yes' ;
-        % If you want overstuff, then set refModels = 'No' ;
-        refModelsYesNo = 'No' ;
-        % Medial overstuff 
+        % Medial overstuff
         %   Femur (VV): [ 0 , 2 ], (IE): [ -2 , 0 ]
         %   Tibia (VV): [ -2 , 0 ]
         % Lateral overstuff
         %   Femur (VV): [ -2 , 0 ], (IE): [ 0 , 2 ]
         %   Tibia (VV): [ 0 , 2 ]
-        if isequal( refModelsYesNo , 'No' )
-            Params.femRot.vv = [ -2 , 0 ] ;
-            Params.femRot.ie = [ 0 , 2 ] ;
-            Params.tibRot.vv = [ 0 , 2 ] ;
-            % Params.tibRot.ie = [ 0 2 ] ;
-        end
+
+        Params.femRot.vv = [ 0 , 1 ] ;
+        Params.femRot.ie = [ -1 , 0 ] ;
+        Params.tibRot.vv = [ -1 , 0 ] ;
+        % Params.tibRot.ie = [ 0 , 0 ] ;
+
 end
 
 % ------------------------------------------------------------------------
@@ -173,7 +164,7 @@ end
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'var' } ;
+Params.testDOFs = { 'ant' , 'post' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, you can leave blank
@@ -184,7 +175,7 @@ Params.kneeFlexAngles = { 0 } ;
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 10 } ;
+Params.externalLoads = { 100 , 100 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -240,60 +231,39 @@ Params.baseMdlFile = fullfile( pwd , 'lenhart2015' , [ Params.baseMdl , '.osim' 
 switch Params.localOrHT
     case 'local'
         % Check if inputs, stochModels, and results directories exist. If
-        % they don't, create them. If they do, delete contents to start
-        % from scratch
-
-        % inputs
-        if ~exist( 'inputs' , 'dir' )
-            mkdir( 'inputs' )
-        else
-            xmlFiles = dir( fullfile( 'inputs' , '*.xml' ) ) ;
-            for iFile = 1 : length( xmlFiles )
-                delete( fullfile( 'inputs' , xmlFiles(iFile).name ) )
-            end
-            stoFiles = dir( fullfile( 'inputs' , '*.sto' ) ) ;
-            for iFile = 1 : length( stoFiles )
-                delete( fullfile( 'inputs' , stoFiles(iFile).name ) )
-            end
-        end
-
-        % stochModels
-        if ~exist( 'stochModels' , 'dir' )
-            mkdir( 'stochModels' )
-            copyfile( 'lenhart2015\Geometry' , 'stochModels\Geometry' )
-        else
-            osimFiles = dir( fullfile( 'stochModels' , '*.osim' ) ) ;
-            for iFile = 1 : length( osimFiles )
-                delete( fullfile( 'stochModels' , osimFiles(iFile).name ) )
-            end
-            matFiles = dir( fullfile( 'stochModels' , '*.mat' ) ) ;
-            for iFile = 1 : length( matFiles )
-                delete( fullfile( 'stochModels' , matFiles(iFile).name ) )
-            end
-        end
-
-        % results
-        if ~exist( 'results' , 'dir' )
-            mkdir( 'results' )
-        else
-            stoFiles = dir( fullfile( 'results' , '*.sto' ) ) ;
-            for iFile = 1 : length( stoFiles )
-                delete( fullfile( 'results' , stoFiles(iFile).name ) )
-            end
-        end
-
-    case 'HT'
-        % Check to see if Params.baseOutDir exists. If it doesn't, then
-        % create subfolders to be able to use on the high throughput grid
+        % they don't, create them.
+        % baseOutDir
         if ~exist( Params.baseOutDir , 'dir' )
             mkdir( Params.baseOutDir )
         end
+        % inputs
+        if ~exist( fullfile( Params.baseOutDir , 'inputs' ) , 'dir' )
+            mkdir( fullfile( Params.baseOutDir , 'inputs' ) )
+        end
+        % stochModels
+        if ~exist( fullfile( Params.baseOutDir , 'stochModels' ) , 'dir' )
+            mkdir( fullfile( Params.baseOutDir , 'stochModels' ) )
+            copyfile( 'lenhart2015\Geometry' , fullfile( Params.baseOutDir , 'stochModels\Geometry' ) )
+        end
+        % results
+        if ~exist( fullfile( Params.baseOutDir , 'results' ) , 'dir' )
+            mkdir( fullfile( Params.baseOutDir , 'results' ) )
+        end
+    case 'HT'
+        % Check to see if Params.baseOutDir exists. If it doesn't, then
+        % create subfolders to be able to use on the high throughput grid
+        % baseOutDir
+        if ~exist( Params.baseOutDir , 'dir' )
+            mkdir( Params.baseOutDir )
+        end
+        % inputs
         if ~exist( fullfile( Params.baseOutDir , 'input' ) , 'dir' )
             mkdir( fullfile( Params.baseOutDir , 'input' ) )
             for iMdl = 1 : Params.numModels
                 mkdir( fullfile( Params.baseOutDir , 'input' , num2str(iMdl-1) ) )
             end
         end
+        % shared folders and results folders
         for iDOF = 1 : length( Params.testDOFs )
             if ~exist( fullfile( Params.baseOutDir , Params.testDOFs{iDOF} ) , 'dir' )
                 mkdir( fullfile( Params.baseOutDir , Params.testDOFs{iDOF} ) )
@@ -304,7 +274,6 @@ switch Params.localOrHT
                 end
             end
         end
-
 end
 
 %% ======================== Create Stoch Models ==========================
@@ -312,19 +281,37 @@ end
 % ========================================================================
 
 % Run createStochMalalignMdl code if running implant code
-if isequal( Params.baseMdl , 'lenhart2015_implant' ) || isequal( Params.baseMdl , 'lenhart2015_BCRTKA' )
-    if isequal( refModelsYesNo , 'No' )
-        doneMsg = createStochMalalignMdl( Params ) ;
-    else
-        % If they are ref models, then copy the implant STLs to be in the
-        % shared directory
-        copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
-        copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
-    end
-end
+if isequal( copyModelsYesNo , 'No' )
 
-% Create Stochastic models
-StochMdlParams = createStochModels( Params ) ;
+
+    switch Params.baseMdl
+        case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+
+            switch Params.localOrHT
+                case 'local'
+                    % Create stoch mal aligned implants
+                    doneMsg = createStochMalalignMdl( Params ) ;
+
+                case 'HT'
+                    if isfield( Params , 'femRot' ) || isfield( Params , 'tibRot' )
+                        % If rotating either the femur or tibia, then run
+                        % createStochMalalignMdl
+                        doneMsg = createStochMalalignMdl( Params ) ;
+                    else
+                        % If rotating neither implant, then copy the implant STLs to be in
+                        % the shared directory
+                        for iDOF = 1 : length( Params.testDOFs )
+                            copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+                            copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+                        end
+                    end
+            end
+    end
+
+    % Create Stochastic models
+    StochMdlParams = createStochModels( Params ) ;
+
+end
 
 %% =================== Define Simulation Time Points =====================
 % Define the duration of each portion of the simulation (flexion, settle,
@@ -454,7 +441,7 @@ for iTrial = 1 : Params.numTrials
 
     switch Params.localOrHT
         case 'local'
-            outDir = fullfile( pwd , 'inputs' ) ;
+            outDir = fullfile( Params.baseOutDir , 'inputs' ) ;
         case 'HT'
             outDir = fullfile( Params.baseOutDir , tempDOF , 'shared' ) ;
     end
@@ -573,7 +560,7 @@ for iTrial = 1 : Params.numTrials
 
         switch Params.localOrHT
             case 'local'
-                outDir = fullfile( pwd , 'inputs' ) ;
+                outDir = fullfile( Params.baseOutDir , 'inputs' ) ;
             case 'HT'
                 outDir = fullfile( Params.baseOutDir , tempDOF , 'shared' ) ;
         end
@@ -635,16 +622,16 @@ for iTrial = 1 : Params.numTrials
                         tempStochFemName = [ Params.femImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
                         tempStochTibName = [ Params.tibImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
 
-                        movefile( fullfile( pwd , 'stochModels' , 'Geometry' , tempStochFemName ) , ...
-                            fullfile( pwd , 'stochModels' , 'Geometry' , Params.femImplant ) )
-                        movefile( fullfile( pwd , 'stochModels' , 'Geometry' , tempStochTibName ) , ...
-                            fullfile( pwd , 'stochModels' , 'Geometry' , Params.tibImplant ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochFemName ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.femImplant ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochTibName ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.tibImplant ) )
                 end
 
                 % Specify settings
                 forsimSettingsFileName = [ 'forsim_settings_' , tempTrialName , '.xml' ] ;
-                modelFile = [ './stochModels/lenhart2015_stoch' , num2str(iMdl) , '.osim' ] ;
-                forsimResultDir = './results';
+                modelFile = fullfile( Params.baseOutDir , 'stochModels' , [ 'lenhart2015_stoch' , num2str(iMdl) , '.osim' ] ) ;
+                forsimResultDir = fullfile( Params.baseOutDir , 'results' ) ;
                 resultsBasename = [ tempTrialName , '_' , num2str( iMdl ) ] ;
 
                 % Set the integrator accuracy
@@ -671,7 +658,7 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
                 forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
                 forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
-                forsim.set_use_activation_dynamics( false ) ; % use activation dynamics
+                forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
                 forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
                 forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
                 % Set all coordinates to be unconstrained except flexion-extension
@@ -686,14 +673,14 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_unconstrained_coordinates( 8 , '/jointset/pf_r/pf_tx_r' ) ;
                 forsim.set_unconstrained_coordinates( 9 , '/jointset/pf_r/pf_ty_r' ) ;
                 forsim.set_unconstrained_coordinates( 10 , '/jointset/pf_r/pf_tz_r' ) ;
-                forsim.set_prescribed_coordinates_file( fullfile( 'inputs' , [ 'prescribed_coordinates_' , tempTrialName , '.sto' ] ) ) ;
+                forsim.set_prescribed_coordinates_file( fullfile( Params.baseOutDir , 'inputs' , [ 'prescribed_coordinates_' , tempTrialName , '.sto' ] ) ) ;
                 if strcmp( tempDOF , 'flex' ) % passive flexion
                     forsim.set_external_loads_file( '' ) ;
                 else % laxity test
-                    forsim.set_external_loads_file( fullfile( 'inputs' , [ 'external_loads_' , tempTrialName , '.xml' ] ) ) ;
+                    forsim.set_external_loads_file( fullfile( Params.baseOutDir , 'inputs' , [ 'external_loads_' , tempTrialName , '.xml' ] ) ) ;
                 end
                 forsim.set_use_visualizer( false ) ; % use visualizer while running (true or false)
-                forsim.print( fullfile( pwd , 'inputs' , forsimSettingsFileName ) ) ;
+                forsim.print( fullfile( Params.baseOutDir , 'inputs' , forsimSettingsFileName ) ) ;
 
                 tic % compute time that simulation runs
                 disp( [ 'Running Forsim Tool, Model '  , num2str( iMdl ) ] )
@@ -703,10 +690,10 @@ for iTrial = 1 : Params.numTrials
                 % If implant model, then switch back names of implants
                 switch Params.baseMdl
                     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
-                        movefile( fullfile( pwd , 'stochModels' , 'Geometry' , Params.femImplant ) , ...
-                            fullfile( pwd , 'stochModels' , 'Geometry' , tempStochFemName ) )
-                        movefile( fullfile( pwd , 'stochModels' , 'Geometry' , Params.tibImplant ) , ...
-                            fullfile( pwd , 'stochModels' , 'Geometry' , tempStochTibName ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.femImplant ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochFemName ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.tibImplant ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochTibName ) )
                 end
 
             end
@@ -747,7 +734,7 @@ for iTrial = 1 : Params.numTrials
             forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
             forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
             forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
-            forsim.set_use_activation_dynamics( false ) ; % use activation dynamics
+            forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
             forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
             forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
             % Set all coordinates to be unconstrained except flexion-extension

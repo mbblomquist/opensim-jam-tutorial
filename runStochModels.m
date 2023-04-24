@@ -38,14 +38,14 @@ Logger.setLevelString( 'Info' ) ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'local' ;
+Params.localOrHT = 'HT' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels3' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -66,11 +66,11 @@ switch copyModelsYesNo
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = Params.baseOutDir ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels' ;
 end
 
 % Number of models to create and run
-Params.numModels = 2 ;
+Params.numModels = 1 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
@@ -238,7 +238,11 @@ switch Params.localOrHT
         end
         % inputs
         if ~exist( fullfile( Params.baseOutDir , 'inputs' ) , 'dir' )
-            mkdir( fullfile( Params.baseOutDir , 'inputs' ) )
+            if isequal( copyModelsYesNo , 'Yes' )
+                copyfile( fullfile( fldWithModels , 'inputs' ) , fullfile( Params.baseOutDir , 'inputs' ) )
+            else
+                mkdir( fullfile( Params.baseOutDir , 'inputs' ) )
+            end
         end
         % stochModels
         if ~exist( fullfile( Params.baseOutDir , 'stochModels' ) , 'dir' )
@@ -258,9 +262,16 @@ switch Params.localOrHT
         end
         % inputs
         if ~exist( fullfile( Params.baseOutDir , 'input' ) , 'dir' )
-            mkdir( fullfile( Params.baseOutDir , 'input' ) )
-            for iMdl = 1 : Params.numModels
-                mkdir( fullfile( Params.baseOutDir , 'input' , num2str(iMdl-1) ) )
+            if isequal( copyModelsYesNo , 'Yes' )
+                copyfile( fullfile( fldWithModels , 'input' ) , fullfile( Params.baseOutDir , 'input' ) )
+                for iMdl = 1 : Params.numModels
+                    delete( fullfile( Params.baseOutDir , 'input' , num2str(iMdl-1) , '*.stl' ) )
+                end
+            else
+                mkdir( fullfile( Params.baseOutDir , 'input' ) )
+                for iMdl = 1 : Params.numModels
+                    mkdir( fullfile( Params.baseOutDir , 'input' , num2str(iMdl-1) ) )
+                end
             end
         end
         % shared folders and results folders

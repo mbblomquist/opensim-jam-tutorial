@@ -45,7 +45,7 @@ Params.localOrHT = 'HT' ;
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels3' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels2' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -70,7 +70,7 @@ switch copyModelsYesNo
 end
 
 % Number of models to create and run
-Params.numModels = 1 ;
+Params.numModels = 10 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
@@ -164,18 +164,18 @@ end
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'ant' , 'post' } ;
+Params.testDOFs = { 'var' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, you can leave blank
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 0 } ;
+Params.kneeFlexAngles = { 20 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 100 , 100 } ;
+Params.externalLoads = { 10 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -291,33 +291,32 @@ end
 % Create stochastic models and (if applicable) malaligned implants
 % ========================================================================
 
+switch Params.baseMdl
+    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+
+        switch Params.localOrHT
+            case 'local'
+                % Create stoch mal aligned implants
+                doneMsg = createStochMalalignMdl( Params ) ;
+
+            case 'HT'
+                if isfield( Params , 'femRot' ) || isfield( Params , 'tibRot' )
+                    % If rotating either the femur or tibia, then run
+                    % createStochMalalignMdl
+                    doneMsg = createStochMalalignMdl( Params ) ;
+                else
+                    % If rotating neither implant, then copy the implant STLs to be in
+                    % the shared directory
+                    for iDOF = 1 : length( Params.testDOFs )
+                        copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+                        copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+                    end
+                end
+        end
+end
+
 % Run createStochMalalignMdl code if running implant code
 if isequal( copyModelsYesNo , 'No' )
-
-
-    switch Params.baseMdl
-        case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
-
-            switch Params.localOrHT
-                case 'local'
-                    % Create stoch mal aligned implants
-                    doneMsg = createStochMalalignMdl( Params ) ;
-
-                case 'HT'
-                    if isfield( Params , 'femRot' ) || isfield( Params , 'tibRot' )
-                        % If rotating either the femur or tibia, then run
-                        % createStochMalalignMdl
-                        doneMsg = createStochMalalignMdl( Params ) ;
-                    else
-                        % If rotating neither implant, then copy the implant STLs to be in
-                        % the shared directory
-                        for iDOF = 1 : length( Params.testDOFs )
-                            copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
-                            copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
-                        end
-                    end
-            end
-    end
 
     % Create Stochastic models
     StochMdlParams = createStochModels( Params ) ;
@@ -647,7 +646,7 @@ for iTrial = 1 : Params.numTrials
 
                 % Set the integrator accuracy
                 %   Choose value between speed (1e-2) vs accuracy (1e-8)
-                integratorAccuracy = 1e-2 ;
+                integratorAccuracy = 1e-4 ;
 
                 % Create ForsimTool
                 forsim = ForsimTool() ;
@@ -723,7 +722,7 @@ for iTrial = 1 : Params.numTrials
 
             % Set the integrator accuracy
             %   Choose value between speed (1e-2) vs accuracy (1e-8)
-            integratorAccuracy = 1e-2 ;
+            integratorAccuracy = 1e-4 ;
 
             % Create ForsimTool
             forsim = ForsimTool() ;

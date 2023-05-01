@@ -91,6 +91,14 @@ switch distType
         else
             ieTibMalrot = zeros( numMdls, 1 ) ;
         end
+        % Tib fe
+        if isfield( tibRot , 'fe' )
+            mu = tibRot.fe( 1 );
+            sd = tibRot.fe( 2 );
+            feTibMalrot = normrnd( mu , sd , numMdls , 1 ) ;
+        else
+            feTibMalrot = zeros( numMdls, 1 ) ;
+        end
     case 'uniform'
         % Femoral component
         % Fem vv
@@ -126,6 +134,14 @@ switch distType
         else
             ieTibMalrot = zeros( numMdls, 1 ) ;
         end
+        % Tib fe
+        if isfield( tibRot , 'fe' )
+            lowLim = tibRot.fe( 1 );
+            upLim = tibRot.fe( 2 );
+            feTibMalrot = lowLim + ( upLim - lowLim ) .* rand( numMdls , 1 ) ;
+        else
+            feTibMalrot = zeros( numMdls, 1 ) ;
+        end
 end
 
 %% Create malaligned component files
@@ -137,17 +153,19 @@ vvFem = round( vvFemMalrot , 2 ) ;
 ieFem = round( ieFemMalrot , 2 ) ;
 vvTib = round( vvTibMalrot , 2 ) ;
 ieTib = round( ieTibMalrot , 2 ) ;
+feTib = round( feTibMalrot , 2 ) ;
 
 % Store into Params struct for malrotateArticularSurfaces.m
 Params.vvFemMalrot = vvFemMalrot ;
 Params.ieFemMalrot = ieFemMalrot ;
 Params.vvTibMalrot = vvTibMalrot ;
 Params.ieTibMalrot = ieTibMalrot ;
+Params.feTibMalrot = feTibMalrot ;
 
 mdlNums = 1 : numMdls ;
 
-malrotLog.hdr = { 'Sim Num', 'vvFem', 'ieFem', 'vvTib', 'ieTib' };
-malrotLog.data = [ mdlNums' , vvFem , ieFem , vvTib , ieTib ];
+malrotLog.hdr = { 'Sim Num', 'vvFem', 'ieFem', 'vvTib', 'ieTib' , 'feTib' };
+malrotLog.data = [ mdlNums' , vvFem , ieFem , vvTib , ieTib , feTib ];
 
 % Save stochastic values
 switch Params.localOrHT
@@ -174,21 +192,22 @@ end
 %% malrotateArticularSurfaces
 function [done,femMalrot,tibMalrot] = malrotateArticularSurfaces( Params , iSim )
 % -------------------------------------------------------------------------
-% this script is used to vary V-V and I-E positions of articular surfaces
+% this script is used to vary positions of articular surfaces
 % 
 % Overview:
 % 
-% 1. Load OBJ file of components
+% 1. Load STL file of components
 % 2. Translate point clouds to desired origin for transformation
 % 3. Transform point clouds
 % 4. Translate point clouds back to original origin
-% 5. Write new OBJ file of components
+% 5. Write new STL file of components
 % 
 % 
 % WRITTEN BY JOSH ROTH
 % v1 (JDR): Initial Release
 % v2 (MBB): Compatible with OpenSim
 % v3 (MBB): Updated to fit into OpenSim_JAM pipeline
+% v4 (MBB): Add in ability to change tibial slope
 % -------------------------------------------------------------------------
 
 %==============
@@ -203,6 +222,7 @@ vvFemMalrot = Params.vvFemMalrot ;
 ieFemMalrot = Params.ieFemMalrot ;
 vvTibMalrot = Params.vvTibMalrot ;
 ieTibMalrot = Params.ieTibMalrot ;
+feTibMalrot = Params.feTibMalrot ;
 
 femPts = fem.pts;
 femTri = fem.tri;
@@ -212,26 +232,23 @@ tibPts = tib.pts;
 tibTri = tib.tri;
 tibNorm = tib.norm;
 
-% Plot points
-plotComponents = 0 ; % "1" to plot components at initial and final steps and "0" to not plot anything
+% Plot points for troubleshooting help
 plotTroubleshooting = 0 ; % "1" to plot components at all steps and "0" to not plot anything
     
 % APPLY OFFSET FOR TRANSFORMATION
 %   translate *.stl points such that origin for tranformation is located at
-%   the geometric center in AP and ML and the most distal in PD
+%   - the most medial or lateral point for V-V rotation
+%   - the A-P and M-L center for I-E rotation
+%   - the most anterior point for F-E rotation
 
-% Plot stl points
-if plotComponents == 1
-    figure()
-    plot3(femPts(:,1),femPts(:,2), femPts(:,3),'g.')
-    hold on
-    plot3(tibPts(:,1),tibPts(:,2), tibPts(:,3),'g.')
-    axis equal tight
-end
-
-
+%--------------------------------------------------------------------------
 % Define offsets for femoral articular surface based on axis of malrotation
-%-------------------------------------------------------------------------
+%--------------------------------------------------------------------------
+
+% =============================
+% NEED TO FIX FEMORAL ROTATIONS
+% =============================
+
 if vvFemMalrot(iSim) > 0
     mlAxisFem = 'LatDist' ;
 elseif vvFemMalrot(iSim) < 0
@@ -265,94 +282,48 @@ apOffsetFem = -min(femPts(:,1));
 % Origin now max posterior, max distal, medial/laterally at max distal point
 femCentered = [femPts(:,1)+apOffsetFem,femPts(:,2)-pdOffsetFem,femPts(:,3)+mlOffsetFem];
 
+%-------------------------------------------------------------------------
 % Define offsets for tibial articular surface based on axis of malrotation
 %-------------------------------------------------------------------------
-if vvTibMalrot(iSim)>0
-    mlAxisTib = 'LatDist';
-%     mlAxis = 'LatEdge';
-elseif vvTibMalrot(iSim)<0
-    mlAxisTib = 'MedDist';
-%     mlAxis = 'MedEdge';
-else 
-    mlAxisTib = 'Center';   
+
+if vvTibMalrot(iSim) ~= 0
+
+    % Find most medial or lateral point
+    if vvTibMalrot(iSim) < 0
+        [ ~ , rotPt ] = max( tibPts(:,3) );
+    elseif vvTibMalrot(iSim) > 0
+        [ ~ , rotPt ] = min( tibPts(:,3) ) ;        
+    end
+
+    % Extract A-P, P-D, and M-L coordinates of medial or lateral point
+    apOffsetTib = -tibPts(rotPt,1) ;
+    pdOffsetTib = -tibPts(rotPt,2) ;
+    mlOffsetTib = -tibPts(rotPt,3) ;
+
+elseif ieTibMalrot ~= 0
+
+    midAP = mean( [ max( tibPts(:,1) ) , min( tibPts(:,1) ) ] ) ;
+    midML = mean( [ max( tibPts(:,3) ) , min( tibPts(:,3) ) ] ) ;
+
+    % Move to be midpoint of A-P and M-L (P-D doesnt matter)
+    apOffsetTib = -midAP ;
+    pdOffsetTib = 0 ;
+    mlOffsetTib = -midML ;
+
+elseif feTibMalrot ~= 0
+
+    % Find most anterior point
+    [ ~ , rotPt ] = max( tibPts(:,1) );
+
+    % Extract A-P, P-D, and M-L coordinates of anterior point
+    apOffsetTib = -tibPts(rotPt,1) ;
+    pdOffsetTib = -tibPts(rotPt,2) ;
+    mlOffsetTib = -tibPts(rotPt,3) ;
+
 end
 
-pdOffsetTib = min(tibPts(:,2)); % find most distal point
-
-switch mlAxisTib
-    case 'LatDist'
-        latCompartmentIndicesTib = tibPts(:,3)<0;
-        latCompartmentTib = tibPts(latCompartmentIndicesTib,:);
-        [ ~ , latMostDistIndexTib] = min(latCompartmentTib(:,2));
-        mlOffsetTib = latCompartmentTib(latMostDistIndexTib,3);
-        %     mlOffsetTib = (max(tibPts(:,3)) - min(tibPts(:,3)))/4; %rotation about center of lateral condyle
-    case 'LatEdge'
-        latCompartmentIndicesTib = tibPts(:,3)>0;
-        latCompartmentTib = tibPts(latCompartmentIndicesTib,:);
-        [ ~ , latMostLatIndexTib] = max(latCompartmentTib(:,3));
-        mlOffsetTib = latCompartmentTib(latMostLatIndexTib,3);
-    case 'Center'
-        mlOffsetTib = -(max(tibPts(:,3)) + min(tibPts(:,3)))/2;
-    case 'MedDist'
-        medCompartmentIndicesTib = tibPts(:,3)<0;
-        medCompartmentTib = tibPts(medCompartmentIndicesTib,:);
-        [ ~ , medMostDistIndexTib] = min(medCompartmentTib(:,2));
-        mlOffsetTib = -medCompartmentTib(medMostDistIndexTib,3);
-        %     mlOffsetTib = -(max(tibPts(:,3)) - min(tibPts(:,3)))/4; %rotation about center of medial condyle
-    case 'MedEdge'
-        medCompartmentIndicesTib = tibPts(:,3)<0;
-        medCompartmentTib = tibPts(medCompartmentIndicesTib,:);
-        [ ~ , medMostMedIndexTib] = min(medCompartmentTib(:,3));
-        mlOffsetTib = medCompartmentTib(medMostMedIndexTib,3);
-        %     mlOffsetTib = -(max(tibPts(:,3)) - min(tibPts(:,3)))/4; %rotation about center of medial condyle
-end
-
-apOffsetTib = -min(tibPts(:,1));
-
-tibCentered = [tibPts(:,1)+apOffsetTib,tibPts(:,2)-pdOffsetTib,tibPts(:,3)-mlOffsetTib];
-
-if plotComponents == 1 && plotTroubleshooting == 1
-    plot3(tibCentered(:,1),tibCentered(:,2), tibCentered(:,3),'cx')
-    axis equal tight
-%     plot3(femCentered(:,1),femCentered(:,2), femCentered(:,3),'cx')
-%     axis equal tight
-end
-
-
-% ALIGN TO GS COORDINATE SYSTEM
-
-%re-aligned fem with x = FE, y = VV, z = IE per Grood-Suntay Coordinate
-%System
-
-thetaY = deg2rad(-90);
-
-Ry = [cos(thetaY)   0   sin(thetaY);
-      0             1   0;
-      -sin(thetaY)  0   cos(thetaY)];
-
-femGS = femCentered * Ry;
-femNormGS = femNorm * Ry;
-
-tibGS = tibCentered * Ry;
-tibNormGS = tibNorm * Ry;
-
-thetaX = deg2rad(-90);
-Rx = [  1   0               0;
-        0   cos(thetaX)     -sin(thetaX);
-        0   sin(thetaX)     cos(thetaX)];
-
-femGS = femGS * Rx;
-femNormGS = femNormGS * Rx;
-
-tibGS = tibGS * Rx;
-tibNormGS = tibNormGS * Rx;
-
-if plotComponents == 1 && plotTroubleshooting == 1
-%     plot3(femGS(:,1),femGS(:,2), femGS(:,3),'ms')
-    plot3(tibGS(:,1),tibGS(:,2), tibGS(:,3),'ms')
-    axis equal tight
-end
-
+% Translate point
+tibCentered = [ tibPts(:,1) + apOffsetTib , tibPts(:,2) + pdOffsetTib , tibPts(:,3) + mlOffsetTib ] ;
 
 % TRANSFORM ARTICULAR SURFACES USING RANDOMLY GENERATED TRANSFORMATION MATRIX
 %X = A-P, Y = P-D, Z = M-L
@@ -372,7 +343,6 @@ end
 %       0   0   1   0;
 %       0   0   0   1];
 
-
 feFem   = deg2rad(0); %flexion-extension rotation in rad
 vvFem   = deg2rad(vvFemMalrot(iSim)); %varus-valgus rotation in rad +Valgus -Varus
 ieFem   = deg2rad(ieFemMalrot(iSim)); %internal-external rotation in rad +External -Internal
@@ -382,86 +352,44 @@ transFem = [cos(vvFem)*cos(ieFem)                                       -cos(vvF
             cos(feFem)*sin(ieFem) + cos(ieFem)*sin(feFem)*sin(vvFem)    cos(feFem)*cos(ieFem)-sin(feFem)*sin(vvFem)*sin(ieFem)  -cos(vvFem)*sin(feFem)  ;
             sin(feFem)*sin(ieFem) - cos(feFem)*cos(ieFem)*sin(vvFem)    cos(ieFem)*sin(feFem)+cos(feFem)*sin(vvFem)*sin(ieFem)  cos(feFem)*cos(vvFem)   ];
         
-% femCenteredTrans = femCentered * transFem;
-femCenteredTrans = femGS * transFem;
-femNormTrans = femNormGS * transFem;
+femCenteredTrans = femCentered * transFem;
+femNormTrans = femNorm * transFem;
 
-feTib   = deg2rad(0); %flexion-extension rotation in rad
-vvTib   = deg2rad(vvTibMalrot(iSim)); %varus-valgus rotation in rad
-ieTib   = deg2rad(ieTibMalrot(iSim)); %internal-external rotation in rad
+vv2Tib   = deg2rad(vvTibMalrot(iSim)); %flexion-extension rotation in rad
+ie2Tib   = deg2rad(ieTibMalrot(iSim)); %varus-valgus rotation in rad
+fe2Tib   = deg2rad(feTibMalrot(iSim)); %internal-external rotation in rad
 
 %transformation applied using Cardan sequence fe-vv-ie
-transTib = [cos(vvTib)*cos(ieTib)                                       -cos(vvTib)*sin(ieTib)                                  sin(vvTib)              ;
-            cos(feTib)*sin(ieTib) + cos(ieTib)*sin(feTib)*sin(vvTib)    cos(feTib)*cos(ieTib)-sin(feTib)*sin(vvTib)*sin(ieTib)  -cos(vvTib)*sin(feTib)  ;
-            sin(feTib)*sin(ieTib) - cos(feTib)*cos(ieTib)*sin(vvTib)    cos(ieTib)*sin(feTib)+cos(feTib)*sin(vvTib)*sin(ieTib)  cos(feTib)*cos(vvTib)   ];
+transTib = [cos(ie2Tib)*cos(fe2Tib)                                       -cos(ie2Tib)*sin(fe2Tib)                                  sin(ie2Tib)              ;
+            cos(vv2Tib)*sin(fe2Tib) + cos(fe2Tib)*sin(vv2Tib)*sin(ie2Tib)    cos(vv2Tib)*cos(fe2Tib)-sin(vv2Tib)*sin(ie2Tib)*sin(fe2Tib)  -cos(ie2Tib)*sin(vv2Tib)  ;
+            sin(vv2Tib)*sin(fe2Tib) - cos(vv2Tib)*cos(fe2Tib)*sin(ie2Tib)    cos(fe2Tib)*sin(vv2Tib)+cos(vv2Tib)*sin(ie2Tib)*sin(fe2Tib)  cos(vv2Tib)*cos(ie2Tib)   ];
         
-tibCenteredTrans = tibGS * transTib;
-tibNormTrans = tibNormGS * transTib;
+tibCenteredTrans = tibCentered * transTib;
+tibNormTrans = tibNorm * transTib;
 
 % ALIGN BACK TO IMPORTED COORDINATE SYSTEM
 
-% Re-aligned fem with x = FE, y = VV, z = IE per Grood-Suntay Coordinate System
+femPtsNew = [femCenteredTrans(:,1) - apOffsetFem,femCenteredTrans(:,2) + pdOffsetFem,femCenteredTrans(:,3) - mlOffsetFem];
+tibPtsNew = [tibCenteredTrans(:,1) - apOffsetTib,tibCenteredTrans(:,2) - pdOffsetTib,tibCenteredTrans(:,3) - mlOffsetTib];
 
-thetaX = deg2rad(90);
-Rx = [  1   0               0;
-        0   cos(thetaX)     -sin(thetaX);
-        0   sin(thetaX)     cos(thetaX)];
-
-femCenteredTrans = femCenteredTrans * Rx;
-femNormTrans = femNormTrans * Rx;
-
-tibCenteredTrans = tibCenteredTrans * Rx;
-tibNormTrans = tibNormTrans * Rx;
-
-thetaY = deg2rad(90);
-
-Ry = [cos(thetaY)   0   sin(thetaY);
-      0             1   0;
-      -sin(thetaY)  0   cos(thetaY)];
-
-% thetaZ = deg2rad(-90);
-% 
-% Rz = [ cos(thetaZ)   -sin(thetaZ)  0;
-%       sin(thetaZ)   cos(thetaZ)   0;
-%       0             0             1];
-
-femCenteredTrans = femCenteredTrans * Ry;
-femNormTrans = femNormTrans * Ry;
-
-tibCenteredTrans = tibCenteredTrans * Ry;
-tibNormTrans = tibNormTrans * Ry;
-
-if plotComponents == 1 && plotTroubleshooting == 1
-    plot3(femCenteredTrans(:,1), femCenteredTrans(:,2), femCenteredTrans(:,3),'b.')
-    plot3(tibCenteredTrans(:,1), tibCenteredTrans(:,2), tibCenteredTrans(:,3),'b.')
-    axis equal tight
-end
-
-% REMOVE OFFSET FOR TRANSFORMATION TO BRING BACK TO ORIGINAL MODEL COORDINATE SYSTEM
-
-femTrans = [femCenteredTrans(:,1) - apOffsetFem,femCenteredTrans(:,2) + pdOffsetFem,femCenteredTrans(:,3) - mlOffsetFem];
-tibTrans = [tibCenteredTrans(:,1) - apOffsetTib,tibCenteredTrans(:,2) + pdOffsetTib,tibCenteredTrans(:,3) + mlOffsetTib];
-
-if plotComponents == 1
-    figure()
-%     plot3(femTrans(:,1), femTrans(:,2), femTrans(:,3), 'k.')
-    hold on
-    plot3(tibTrans(:,1), tibTrans(:,2), tibTrans(:,3), 'k.')
-    axis equal tight
-    
-%     plot3(femPts(:,1),femPts(:,2), femPts(:,3),'g.')
-%     hold on
+if isequal( plotTroubleshooting , 1 )
+    figure() ; hold on ;
     plot3(tibPts(:,1),tibPts(:,2), tibPts(:,3),'g.')
-
+    plot3(tibCentered(:,1),tibCentered(:,2), tibCentered(:,3),'c.')
+    plot3(tibCenteredTrans(:,1),tibCenteredTrans(:,2), tibCenteredTrans(:,3),'b.')
+    plot3(tibPtsNew(:,1), tibPtsNew(:,2), tibPtsNew(:,3), 'k.')
+    xlabel('x'); ylabel('y') ; zlabel('z') ;
+    axis equal tight
+    legend( 'Old' , 'Transform 1' , 'Transform 2' , 'New' )
 end
 
 %assemble output structures
 %--------------------------
-femMalrot.pts = femTrans;
+femMalrot.pts = femPtsNew;
 femMalrot.norm = femNormTrans;
 femMalrot.tri = femTri;
 
-tibMalrot.pts = tibTrans;
+tibMalrot.pts = tibPtsNew;
 tibMalrot.norm = tibNormTrans;
 tibMalrot.tri = tibTri;
 

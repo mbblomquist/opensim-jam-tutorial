@@ -45,7 +45,7 @@ Params.localOrHT = 'HT' ;
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels2' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testHT2' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -59,14 +59,14 @@ Params.studyId = 'bam014' ;
 %   enable you to reuse models already created. For example, if you ran
 %   some laxity test on a given model set, but later decided you wanted to
 %   run more, then you can set this to 'Yes' to use the same model set
-copyModelsYesNo = 'Yes' ;
+copyModelsYesNo = 'No' ;
 switch copyModelsYesNo
     case 'Yes'
         % Specify the folder with the models. If you are saving the data in
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testExtraModels' ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testHT1' ;
 end
 
 % Number of models to create and run
@@ -107,7 +107,7 @@ Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
 %   For 'uniform': [ <lower_limit> , <upper_limit> ]
 %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
 %       the baseline model value
-Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
+Params.probDistParams = { [ 0 , 0.25 ] , [ 0 , 0.02 ] } ;
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -119,8 +119,8 @@ switch Params.baseMdl
     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
 
         % Femur and tibia implant names
-        Params.femImplant = 'femur_component_surface_gc_katka-lenhart_updated.stl' ;
-        Params.tibImplant = 'tibial_insert_surface_gc_katka-lenhart_updated.stl' ;
+        Params.femImplant = 'femur_component_surface_gc_katka-lenhart_updated_2.stl' ;
+        Params.tibImplant = 'tibial_insert_surface_gc_katka-lenhart_updated_2.stl' ;
 
         % Directory with implant files
         Params.implantDir = fullfile( pwd , 'lenhart2015' , 'Geometry' ) ;
@@ -140,11 +140,14 @@ switch Params.baseMdl
         % Lateral overstuff
         %   Femur (VV): [ -2 , 0 ], (IE): [ 0 , 2 ]
         %   Tibia (VV): [ 0 , 2 ]
+        % Tibial slope changes
+        %   Negative values for larger tibial slope changes: [ -10 , 0 ]
 
-        Params.femRot.vv = [ 0 , 1 ] ;
-        Params.femRot.ie = [ -1 , 0 ] ;
-        Params.tibRot.vv = [ -1 , 0 ] ;
-        % Params.tibRot.ie = [ 0 , 0 ] ;
+%         Params.femRot.vv = [ 0 , 0 ] ;
+%         Params.femRot.ie = [ 0 , 0 ] ;
+%         Params.tibRot.vv = [ 0 , 0 ] ;
+%         Params.tibRot.ie = [ 0 , 0 ] ;
+%         Params.tibRot.fe = [ -5 , 0 ] ;
 
 end
 
@@ -308,8 +311,10 @@ switch Params.baseMdl
                     % If rotating neither implant, then copy the implant STLs to be in
                     % the shared directory
                     for iDOF = 1 : length( Params.testDOFs )
-                        copyfile( fullfile( Params.implantDir , Params.femImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
-                        copyfile( fullfile( Params.implantDir , Params.tibImplant ) , fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' ) )
+                        copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
+                            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-implant.stl' ) )
+                        copyfile( fullfile( Params.implantDir , Params.tibImplant ) , ...
+                            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant.stl') )
                     end
                 end
         end

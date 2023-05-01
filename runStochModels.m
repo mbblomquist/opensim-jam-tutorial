@@ -119,8 +119,8 @@ switch Params.baseMdl
     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
 
         % Femur and tibia implant names
-        Params.femImplant = 'femur_component_surface_gc_katka-lenhart_updated_2.stl' ;
-        Params.tibImplant = 'tibial_insert_surface_gc_katka-lenhart_updated_2.stl' ;
+        Params.femImplant = 'lenhart2015-R-femur-implant.stl' ;
+        Params.tibImplant = 'lenhart2015-R-tibia-implant.stl' ;
 
         % Directory with implant files
         Params.implantDir = fullfile( pwd , 'lenhart2015' , 'Geometry' ) ;

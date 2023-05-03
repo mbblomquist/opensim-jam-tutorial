@@ -72,6 +72,13 @@ for iMdl = 1 : Params.numModels
             % Find indices for each trial
             StoData.idx = parseOpenSimSto( tempData, Params ) ;
 
+            %======%
+            % Time %
+            %======%
+            StoData.( trialNames{ iTrial } ).time( : , iMdl ) = ...
+                tempData.kine.data( : , StoData.idx.time ) ;
+
+
             %============%
             % Kinematics %
             %============%

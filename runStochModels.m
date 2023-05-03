@@ -45,7 +45,7 @@ Params.localOrHT = 'HT' ;
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testHT2' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_short' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -66,7 +66,7 @@ switch copyModelsYesNo
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testHT1' ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_normal' ;
 end
 
 % Number of models to create and run
@@ -77,7 +77,7 @@ Params.numModels = 10 ;
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015_implant' ;
+Params.baseMdl = 'lenhart2015' ;
 
 % Names of ligaments to change
 %   Options: 'allLigs' to change all the ligaments in the model
@@ -673,6 +673,7 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
                 forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
                 forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
+                forsim.set_report_time_step( 0.01 ) ; % set to decrease output size
                 forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
                 forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
                 forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
@@ -749,6 +750,7 @@ for iTrial = 1 : Params.numTrials
             forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
             forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
             forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
+            forsim.set_report_time_step( 0.1 ) ; % set to decrease output size
             forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
             forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
             forsim.set_use_muscle_physiology( true ) ; % use muscle physiology

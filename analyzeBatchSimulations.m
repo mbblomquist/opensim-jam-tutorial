@@ -15,7 +15,7 @@
 % v2    03-30-2023  Updated for local or HT (MBB)
 %
 %==========================================================================
-clc ; clear ; close all ;
+% clc ; clear ; close all ;
 
 %% ======================= Specify Settings ===========================
 % Look through this entire section to change parameters to whatever you
@@ -35,18 +35,11 @@ Params.localOrHT = 'HT' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
-switch Params.localOrHT
-    case 'local'
-        % You don't need to change this. The output directory is in the
-        % current directory (pwd = print working directory)
-        Params.baseOutDir = pwd ;
-    case 'HT'
-        % IF RUNNING ON CHTC, CHANGE THIS TO THE PLACE THE FILES WERE
-        % CREATED
-        Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\testTendComp3' ;
-        % Name of results file (no need to change this)
-        Params.resultsTarFile = 'results.tar.gz' ;
-end
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_short' ;
+
+% Name of results file (no need to change this) - This is for if you ran on
+% the HT grid
+Params.resultsTarFile = 'results.tar.gz' ;
 
 % ------------------------------------------------------------------------
 % ----------------------- SPECIFY MODEL PARAMETERS -----------------------
@@ -61,7 +54,7 @@ Params.numModels = 10 ;
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015_implant' ;
+Params.baseMdl = 'lenhart2015' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -132,7 +125,7 @@ Params.testDOFs = { 'var' } ;
 %   For passive flexion, you can leave blank
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 0 } ;
+Params.kneeFlexAngles = { 20 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test

@@ -15,7 +15,7 @@
 % v2    03-30-2023  Updated for local or HT (MBB)
 %
 %==========================================================================
-% clc ; clear ; close all ;
+clc ; clear ; close all ;
 
 %% ======================= Specify Settings ===========================
 % Look through this entire section to change parameters to whatever you
@@ -31,11 +31,11 @@
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'HT' ;
+Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_short' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
 
 % Name of results file (no need to change this) - This is for if you ran on
 % the HT grid
@@ -47,14 +47,14 @@ Params.resultsTarFile = 'results.tar.gz' ;
 % Specif the model parameters that you want to extract
 
 % Number of models that were run
-Params.numModels = 10 ;
+Params.numModels = 1 ;
 
 % Base model used. Options are in lenhart2015 folder
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015' ;
+Params.baseMdl = 'lenhart2015_implant' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -119,18 +119,18 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'var' } ;
+Params.testDOFs = { 'flex' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
-%   For passive flexion, you can leave blank
+%   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 20 } ;
+Params.kneeFlexAngles = { 30 , 45 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 10 } ;
+Params.externalLoads = { 0 } ;
 
 %% ======================== Compute Trial Name ===========================
 % Computes the trial name(s) that will be used for running through the
@@ -154,8 +154,11 @@ for iDOF = 1 : length( Params.testDOFs )
             trialCounter = trialCounter + 1 ;
         end
     elseif isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
-        Params.trialNames{ trialCounter } = 'flex_passive_0_90' ;
-        trialCounter = trialCounter + 1 ;
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
     end
 end
 

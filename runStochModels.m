@@ -38,14 +38,14 @@ Logger.setLevelString( 'Info' ) ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'HT' ;
+Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_short' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -66,18 +66,18 @@ switch copyModelsYesNo
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\05-03-2023_normal' ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testFlex' ;
 end
 
 % Number of models to create and run
-Params.numModels = 10 ;
+Params.numModels = 1 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015' ;
+Params.baseMdl = 'lenhart2015_implant' ;
 
 % Names of ligaments to change
 %   Options: 'allLigs' to change all the ligaments in the model
@@ -107,7 +107,7 @@ Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
 %   For 'uniform': [ <lower_limit> , <upper_limit> ]
 %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
 %       the baseline model value
-Params.probDistParams = { [ 0 , 0.25 ] , [ 0 , 0.02 ] } ;
+Params.probDistParams = { [ 0 , 0.25 ] , [ 0 , 0.05 ] } ;
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -143,9 +143,9 @@ switch Params.baseMdl
         % Tibial slope changes
         %   Negative values for larger tibial slope changes: [ -10 , 0 ]
 
-%         Params.femRot.vv = [ 0 , 0 ] ;
-%         Params.femRot.ie = [ 0 , 0 ] ;
-%         Params.tibRot.vv = [ 0 , 0 ] ;
+%         Params.femRot.vv = [ 0 , 4 ] ;
+%         Params.femRot.ie = [ -4 , 0 ] ;
+%         Params.tibRot.vv = [ -2 , 0 ] ;
 %         Params.tibRot.ie = [ 0 , 0 ] ;
 %         Params.tibRot.fe = [ -5 , 0 ] ;
 
@@ -167,18 +167,18 @@ end
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'var' } ;
+Params.testDOFs = { 'flex' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
-%   For passive flexion, you can leave blank
+%   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 20 } ;
+Params.kneeFlexAngles = { 30 , 45 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 10 } ;
+Params.externalLoads = { 0 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -217,8 +217,11 @@ for iDOF = 1 : length( Params.testDOFs )
             trialCounter = trialCounter + 1 ;
         end
     elseif isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
-        Params.trialNames{ trialCounter } = 'flex_passive_0_90' ;
-        trialCounter = trialCounter + 1 ;
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
     end
 end
 

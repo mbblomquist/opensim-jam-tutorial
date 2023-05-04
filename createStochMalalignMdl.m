@@ -320,6 +320,13 @@ elseif feTibMalrot ~= 0
     pdOffsetTib = -tibPts(rotPt,2) ;
     mlOffsetTib = -tibPts(rotPt,3) ;
 
+else % no malalignment
+
+    % Set offsets to 0
+    apOffsetTib = 0 ;
+    pdOffsetTib = 0 ;
+    mlOffsetTib = 0 ;
+
 end
 
 % Translate point

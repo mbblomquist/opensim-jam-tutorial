@@ -22,7 +22,6 @@ function outMsg = writeHtcShFile( Params )
 %% Unpack Params structure
 %=========================
 
-testDOF = Params.tempTestDOF ;
 fld = Params.sharedDir ;
 
 %% Write start of *.sh file
@@ -62,23 +61,16 @@ fprintf( shFileId, '%s\n\n' , 'chmod +x opensim-jam/opensim-cmd' ) ;
 %% Write call for laxity forward simulation
 % =========================================
 
-if isequal( testDOF , 'flex' ) % passive flexion
-    fprintf( shFileId , '%s\n' , '# Run Passive Flexion Test' ) ;
+% Indices of trials with this DOF in it
+trialIdc = contains( Params.trialNames , Params.tempTestDOF ) ;
+% Names of trials
+trialsToRun = Params.trialNames( trialIdc ~= 0 ) ;
+for iTrial = 1 : length( trialsToRun )
+    tempTrialName = trialsToRun{iTrial} ;
+    fprintf( shFileId, '%s\n', [ '# Run ' , tempTrialName ] ) ;
     % Call for forward simulation executable
     fprintf( shFileId , '%s%s%s\n\n' , ...
-        'opensim-cmd ' , 'run-tool ' , 'forsim_settings_flex_passive_0_90.xml' ) ;
-else % laxity test
-    % Indices of trials with this DOF in it
-    trialIdc = contains( Params.trialNames , Params.tempTestDOF ) ;
-    % Names of trials
-    trialsToRun = Params.trialNames( trialIdc ~= 0 ) ;
-    for iTrial = 1 : length( trialsToRun )
-        tempTrialName = trialsToRun{iTrial} ;
-        fprintf( shFileId, '%s\n', [ '# Run ' , tempTrialName ] ) ;
-        % Call for forward simulation executable
-        fprintf( shFileId , '%s%s%s\n\n' , ...
-            'opensim-cmd ' , 'run-tool ' , [ 'forsim_settings_' , tempTrialName , '.xml' ] ) ;
-    end
+        'opensim-cmd ' , 'run-tool ' , [ 'forsim_settings_' , tempTrialName , '.xml' ] ) ;
 end
 
 %% Write call to compress results files
@@ -86,19 +78,16 @@ end
 
 fprintf( shFileId , '%s\n' , '# Compress Results Files' ) ;
 resultsString = cell(1,1) ;
-if isequal( testDOF , 'flex' ) % passive flexion
-    resultsString{1} = 'flex_passive_0_90_ForceReporter_forces.sto flex_passive_0_90_states.sto' ;
-else % laxity test
-    % Indices of trials with this DOF in it
-    trialIdc = contains( Params.trialNames , Params.tempTestDOF ) ;
-    % Names of trials
-    trialsToRun = Params.trialNames( trialIdc ~= 0 ) ;
-    for iTrial = 1 : length( trialsToRun )
-        tempTrialName = trialsToRun{iTrial} ;
-        resultsString{1} = [ resultsString{1} , ...
-            tempTrialName , '_ForceReporter_forces.sto ' , ...
-            tempTrialName , '_states.sto ' ] ;
-    end
+
+% Indices of trials with this DOF in it
+trialIdc = contains( Params.trialNames , Params.tempTestDOF ) ;
+% Names of trials
+trialsToRun = Params.trialNames( trialIdc ~= 0 ) ;
+for iTrial = 1 : length( trialsToRun )
+    tempTrialName = trialsToRun{iTrial} ;
+    resultsString{1} = [ resultsString{1} , ...
+        tempTrialName , '_ForceReporter_forces.sto ' , ...
+        tempTrialName , '_states.sto ' ] ;
 end
 
 % Call to tar results files

@@ -38,14 +38,14 @@ Logger.setLevelString( 'Info' ) ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'local' ;
+Params.localOrHT = 'HT' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCL_082_stepDown' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -59,25 +59,26 @@ Params.studyId = 'bam014' ;
 %   enable you to reuse models already created. For example, if you ran
 %   some laxity test on a given model set, but later decided you wanted to
 %   run more, then you can set this to 'Yes' to use the same model set
-copyModelsYesNo = 'No' ;
+copyModelsYesNo = 'Yes' ;
 switch copyModelsYesNo
     case 'Yes'
         % Specify the folder with the models. If you are saving the data in
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\testFlex' ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCLmodels' ;
 end
 
 % Number of models to create and run
-Params.numModels = 1 ;
+Params.numModels = 1250 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015_implant' ;
+%       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
+Params.baseMdl = 'lenhart2015_SarahISTA_PCL' ;
 
 % Names of ligaments to change
 %   Options: 'allLigs' to change all the ligaments in the model
@@ -120,6 +121,7 @@ switch Params.baseMdl
 
         % Femur and tibia implant names
         Params.femImplant = 'lenhart2015-R-femur-implant.stl' ;
+%         Params.tibImplant = 'tibia_medial_052.stl' ;
         Params.tibImplant = 'lenhart2015-R-tibia-implant.stl' ;
 
         % Directory with implant files
@@ -145,11 +147,23 @@ switch Params.baseMdl
 
 %         Params.femRot.vv = [ 0 , 4 ] ;
 %         Params.femRot.ie = [ -4 , 0 ] ;
-%         Params.tibRot.vv = [ -2 , 0 ] ;
+%         Params.tibRot.vv = [ -2 , 2 ] ;
 %         Params.tibRot.ie = [ 0 , 0 ] ;
 %         Params.tibRot.fe = [ -5 , 0 ] ;
 
 end
+
+switch Params.baseMdl
+    case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
+        % Directory with implant files
+        Params.implantDir = fullfile( pwd , 'lenhart2015' , 'Geometry' ) ;
+
+        % Femur and tibia implant names
+        Params.femImplant = 'lenhart2015-R-femur-implant.stl' ;
+        Params.tibImplantMedial = 'lenhart2015-R-tibia-implant-medial.stl' ;
+        Params.tibImplantLateral = 'lenhart2015-R-tibia-implant-lateral.stl' ;
+end
+
 
 % ------------------------------------------------------------------------
 % -------------------- SPECIFY SIMULATION PARAMETERS ---------------------
@@ -167,18 +181,21 @@ end
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'flex' } ;
+%   For Combined loading tests:
+%       Add DOFs separated by hyphen:
+%       Example: compression and anterior load: ant-comp
+Params.testDOFs = { 'post-comp' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 30 , 45 } ;
+Params.kneeFlexAngles = { 30 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
-%   Keep this number positive
-Params.externalLoads = { 0 } ;
+%   Keep these number positive
+Params.externalLoads = { [ 350 , 3000 ] } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -210,18 +227,25 @@ end
 Params.trialNames = { } ; % initialize
 trialCounter = 1 ; % counter for loop
 for iDOF = 1 : length( Params.testDOFs )
-    if ~isequal( Params.testDOFs{iDOF} , 'flex' ) % if laxity test
-        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
-            Params.trialNames{ trialCounter } = ...
-                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF} ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
-            trialCounter = trialCounter + 1 ;
-        end
-    elseif isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
+    if isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
         for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
             Params.trialNames{ trialCounter } = ...
                 [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
             trialCounter = trialCounter + 1 ;
         end
+    elseif contains( Params.testDOFs{iDOF} , '-' ) % if combined loading
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF}(1) ) , '-' , num2str( Params.externalLoads{iDOF}(2) ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
+    else % if laxity test
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF} ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
+    
     end
 end
 
@@ -302,7 +326,6 @@ switch Params.baseMdl
 
         switch Params.localOrHT
             case 'local'
-                % Create stoch mal aligned implants
                 doneMsg = createStochMalalignMdl( Params ) ;
 
             case 'HT'
@@ -322,6 +345,17 @@ switch Params.baseMdl
                 end
         end
 end
+
+switch Params.baseMdl
+    case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
+        copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
+            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-implant.stl' ) )
+        copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
+            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant-medial.stl') )
+        copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
+            fullfile( Params.baseOutDir , Params.testDOFs{1} , 'shared' , 'lenhart2015-R-tibia-implant-lateral.stl') )
+end
+
 
 % Run createStochMalalignMdl code if running implant code
 if isequal( copyModelsYesNo , 'No' )
@@ -482,94 +516,84 @@ for iTrial = 1 : Params.numTrials
     tempTrialName = Params.trialNames{ iTrial } ;
     splitName = split( tempTrialName , '_' ) ;
     if isequal( splitName{1} , 'flex' )
-        tempDOF = 'flex' ;
+        testDOFs = 'flex' ;
     else
-        tempDOF = splitName{2} ;
+        testDOFs = strsplit( splitName{2} , '-' ) ;
+        tempLoads = str2double( extract( splitName{3}(4:end) , digitsPattern ) ) ;
     end
 
     % Create external loads files if it is a laxity test (i.e., not a
     %   passive flexion test)
-    if ~strcmp( tempDOF , 'flex' ) % if not passive flexion test
+    if ~strcmp( testDOFs , 'flex' ) % if not passive flexion test
 
-        % External load magnitude
-        tempLoad = str2double( splitName{3}(4:end) ) ;
+        % External load magnitude(s)
+        tempLoads = str2double( extract( splitName{3}(4:end) , digitsPattern ) ) ;
 
         % .sto and .xml File Name
         externalLoadsSto = [ 'external_loads_' , tempTrialName , '.sto' ] ;
         externalLoadsXml = [ 'external_loads_' , tempTrialName , '.xml' ] ;
 
-        % Define positive and negative directions
-        switch tempDOF
-            case { 'ant', 'ir', 'val', 'comp' }
-                loadSign = 1 ;
-            case { 'post', 'er', 'var', 'dist' }
-                loadSign = -1 ;
-        end
-
-        % Define location and magnitude of load based on testDof and externalLoad
-        switch tempDOF
-            case { 'ant' , 'post' }
-                loadPointHeight = -0.1 ; % Apply at the tibial tuberosity height similar to KT-1000 test
-                loadMagnitude = tempLoad * loadSign ;
-            case { 'var' , 'val' }
-                loadPointHeight = -0.3 ; % Apply near ankle similiar to coronal laxity test
-                loadMagnitude = tempLoad / abs(loadPointHeight) * loadSign ; % Moment, so account for moment arm
-            case { 'ir' , 'er' , 'dist' , 'comp' }
-                loadMagnitude = tempLoad * loadSign ; % Apply at location = 0
-        end
-
-        % Create external load array
-        loadArray = [ zeros( 1 , 4 ) , loadMagnitude , loadMagnitude ] ;
-        smoothLoadArray = interp1( timePoints{iTrial} , loadArray , time{iTrial} , 'pchip' );
-
         % Construct arrays for sto file based on
         loadData.time = time{iTrial} ;
         tempNumSteps = numSteps(iTrial) ;
-        switch tempDOF
-            case { 'ant', 'post' }
-                % Applied load in x-direction distal to knee
-                loadData.tibia_proximal_r_force_vx = smoothLoadArray' ;
-                loadData.tibia_proximal_r_force_vy = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_px = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_py = ones( tempNumSteps , 1 ) * loadPointHeight ;
-                loadData.tibia_proximal_r_force_pz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_x = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_y = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_z = zeros( tempNumSteps , 1 ) ;
-            case { 'var', 'val' }
-                % Applied load in z-direction at ankle
-                loadData.tibia_proximal_r_force_vx = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vy = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vz = smoothLoadArray' ;
-                loadData.tibia_proximal_r_force_px = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_py = ones( tempNumSteps , 1 ) * loadPointHeight ;
-                loadData.tibia_proximal_r_force_pz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_x = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_y = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_z = zeros( tempNumSteps , 1 ) ;
-            case { 'ir', 'er' }
-                % Applied torque about y-direction
-                loadData.tibia_proximal_r_force_vx = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vy = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_px = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_py = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_pz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_x = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_y = smoothLoadArray' ;
-                loadData.tibia_proximal_r_torque_z = zeros( tempNumSteps , 1 ) ;
-            case { 'comp', 'dist' }
-                % Applied force about y-direction
-                loadData.tibia_proximal_r_force_vx = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_vy = smoothLoadArray' ;
-                loadData.tibia_proximal_r_force_vz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_px = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_py = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_force_pz = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_x = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_y = zeros( tempNumSteps , 1 ) ;
-                loadData.tibia_proximal_r_torque_z = zeros( tempNumSteps , 1 ) ;
+
+        % Initialize
+        loadData.tibia_proximal_r_force_vx = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_force_vy = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_force_vz = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_force_px = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_force_py = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_force_pz = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_torque_x = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_torque_y = zeros( tempNumSteps , 1 ) ;
+        loadData.tibia_proximal_r_torque_z = zeros( tempNumSteps , 1 ) ;
+
+        for iDOF = 1 : length( testDOFs )
+
+            tempDOF = testDOFs{ iDOF } ;
+
+            % Define positive and negative directions
+            switch tempDOF
+                case { 'ant', 'ir', 'val', 'comp' }
+                    loadSign = 1 ;
+                case { 'post', 'er', 'var', 'dist' }
+                    loadSign = -1 ;
+            end
+
+            % Define location and magnitude of load based on testDof and externalLoad
+            switch tempDOF
+                case { 'ant' , 'post' }
+                    loadPointHeight = -0.1 ; % Apply at the tibial tuberosity height similar to KT-1000 test
+                    loadMagnitude = tempLoads(iDOF) * loadSign ;
+                case { 'var' , 'val' }
+                    loadPointHeight = -0.3 ; % Apply near ankle similiar to coronal laxity test
+                    loadMagnitude = tempLoads(iDOF) / abs(loadPointHeight) * loadSign ; % Moment, so account for moment arm
+                case { 'ir' , 'er' , 'dist' , 'comp' }
+                    loadMagnitude = tempLoads(iDOF) * loadSign ; % Apply at location = 0
+            end
+
+            % Create external load array
+            loadArray = [ zeros( 1 , 4 ) , loadMagnitude , loadMagnitude ] ;
+            smoothLoadArray = interp1( timePoints{iTrial} , loadArray , time{iTrial} , 'pchip' );
+
+            % Construct arrays for sto file based on
+            switch tempDOF
+                case { 'ant', 'post' }
+                    % Applied load in x-direction distal to knee
+                    loadData.tibia_proximal_r_force_vx = smoothLoadArray' ;
+                    loadData.tibia_proximal_r_force_py = ones( tempNumSteps , 1 ) * loadPointHeight ;
+                case { 'var', 'val' }
+                    % Applied load in z-direction at ankle
+                    loadData.tibia_proximal_r_force_vz = smoothLoadArray' ;
+                    loadData.tibia_proximal_r_force_py = ones( tempNumSteps , 1 ) * loadPointHeight ;
+                case { 'ir', 'er' }
+                    % Applied torque about y-direction
+                    loadData.tibia_proximal_r_torque_y = smoothLoadArray' ;
+                case { 'comp', 'dist' }
+                    % Applied force about y-direction
+                    loadData.tibia_proximal_r_force_vy = smoothLoadArray' ;
+            end
+
         end
 
         % Function distributed in OpenSim Resources\Code\Matlab\Utilities
@@ -580,7 +604,7 @@ for iTrial = 1 : Params.numTrials
             case 'local'
                 outDir = fullfile( Params.baseOutDir , 'inputs' ) ;
             case 'HT'
-                outDir = fullfile( Params.baseOutDir , tempDOF , 'shared' ) ;
+                outDir = fullfile( Params.baseOutDir , splitName{2} , 'shared' ) ;
         end
         STOFileAdapter.write( loadTable , fullfile( outDir , externalLoadsSto ) );
 
@@ -654,7 +678,7 @@ for iTrial = 1 : Params.numTrials
 
                 % Set the integrator accuracy
                 %   Choose value between speed (1e-2) vs accuracy (1e-8)
-                integratorAccuracy = 1e-4 ;
+                integratorAccuracy = 1e-3 ;
 
                 % Create ForsimTool
                 forsim = ForsimTool() ;
@@ -731,7 +755,7 @@ for iTrial = 1 : Params.numTrials
 
             % Set the integrator accuracy
             %   Choose value between speed (1e-2) vs accuracy (1e-8)
-            integratorAccuracy = 1e-4 ;
+            integratorAccuracy = 1e-3 ;
 
             % Create ForsimTool
             forsim = ForsimTool() ;

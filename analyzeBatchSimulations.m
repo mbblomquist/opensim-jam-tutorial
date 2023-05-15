@@ -31,11 +31,11 @@ clc ; clear ; close all ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'local' ;
+Params.localOrHT = 'HT' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCL_082_stepDown' ;
 
 % Name of results file (no need to change this) - This is for if you ran on
 % the HT grid
@@ -47,14 +47,15 @@ Params.resultsTarFile = 'results.tar.gz' ;
 % Specif the model parameters that you want to extract
 
 % Number of models that were run
-Params.numModels = 1 ;
+Params.numModels = 1250 ;
 
 % Base model used. Options are in lenhart2015 folder
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-Params.baseMdl = 'lenhart2015_implant' ;
+%       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
+Params.baseMdl = 'lenhart2015_SarahISTA_PCL' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -66,9 +67,7 @@ Params.jointKinematics = { 'knee_r' , 'pf_r' } ;
 %   quadriceps { 'recfem_r' , 'vasint_r' , 'vaslat_r' , 'vasmed_r' },
 %   hamstrings { 'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' }, and
 %   calf { 'gaslat_r' , 'gasmed_r' , 'soleus_r' } muscles
-Params.muscleNames = { 'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' , ...
-    'gaslat_r' , 'gasmed_r' , 'soleus_r' , ...
-    'recfem_r' , 'vasint_r' , 'vaslat_r' , 'vasmed_r' } ;
+Params.muscleNames = { } ;
 
 % Muscle properties
 %   Options: { 'force' , 'fiber_length' }
@@ -90,7 +89,8 @@ Params.ligamentProperties = { 'force_total' , 'length' , 'strain' } ;
 % Compartment names for contact data
 %   Common options are 'tf_contact' (tibiofemoral joint) or 'pf_contact'
 %   (patellofemoral joint)
-Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
+% Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
+Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
 
 % Contact data properties
 %   Many options, most common are 'mean_pressure' , 'max_pressure' ,
@@ -119,18 +119,18 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'flex' } ;
+Params.testDOFs = { 'post-comp' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 30 , 45 } ;
+Params.kneeFlexAngles = { 30 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 0 } ;
+Params.externalLoads = { [ 350 , 3000 ] } ;
 
 %% ======================== Compute Trial Name ===========================
 % Computes the trial name(s) that will be used for running through the
@@ -147,18 +147,25 @@ Params.externalLoads = { 0 } ;
 Params.trialNames = { } ; % initialize
 trialCounter = 1 ; % counter for loop
 for iDOF = 1 : length( Params.testDOFs )
-    if ~isequal( Params.testDOFs{iDOF} , 'flex' ) % if laxity test
-        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
-            Params.trialNames{ trialCounter } = ...
-                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF} ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
-            trialCounter = trialCounter + 1 ;
-        end
-    elseif isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
+    if isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
         for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
             Params.trialNames{ trialCounter } = ...
                 [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
             trialCounter = trialCounter + 1 ;
         end
+    elseif contains( Params.testDOFs{iDOF} , '-' ) % if combined loading
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF}(1) ) , '-' , num2str( Params.externalLoads{iDOF}(2) ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
+    else % if laxity test
+        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+            Params.trialNames{ trialCounter } = ...
+                [ 'lax_' , Params.testDOFs{iDOF} , '_frc' , num2str( Params.externalLoads{iDOF} ) , '_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+            trialCounter = trialCounter + 1 ;
+        end
+    
     end
 end
 

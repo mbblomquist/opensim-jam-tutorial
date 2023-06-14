@@ -38,14 +38,14 @@ Logger.setLevelString( 'Info' ) ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'HT' ;
+Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
 % I would do it outside of this folder because it's too many files
 % for git to track. I usually create them in a folder on my
 % desktop, but another folder in documents works as well
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCL_082_stepDown' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
 % Also specify which study ID for BAM lab work (not too important,
 % but this is what some files will have for a prefix in their name)
 Params.studyId = 'bam014' ;
@@ -59,18 +59,18 @@ Params.studyId = 'bam014' ;
 %   enable you to reuse models already created. For example, if you ran
 %   some laxity test on a given model set, but later decided you wanted to
 %   run more, then you can set this to 'Yes' to use the same model set
-copyModelsYesNo = 'Yes' ;
+copyModelsYesNo = 'No' ;
 switch copyModelsYesNo
     case 'Yes'
         % Specify the folder with the models. If you are saving the data in
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCLmodels' ;
+        fldWithModels = 'ADD PATH HERE' ;
 end
 
 % Number of models to create and run
-Params.numModels = 1250 ;
+Params.numModels = 1 ;
 
 % Base model to use. Options are in lenhart2015 folder
 %   Current options =
@@ -78,7 +78,7 @@ Params.numModels = 1250 ;
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
 %       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
-Params.baseMdl = 'lenhart2015_SarahISTA_PCL' ;
+Params.baseMdl = 'lenhart2015' ;
 
 % Names of ligaments to change
 %   Options: 'allLigs' to change all the ligaments in the model
@@ -91,6 +91,8 @@ Params.ligNamesToChange = 'allLigs' ;
 % Ligament properties to change [cell array]
 %   Options: 'linear_stiffness', 'slack_length'
 Params.ligPropsToChange = { 'linear_stiffness' , 'slack_length' } ;
+
+% TODO: ADD ABILITY TO CHANGE CARTILAGE WEAR AND ADD OSTEOPHYTES
 
 % Probability distribution type [cell array for each ligPropsToChange]
 %   Options: 'normal' , 'uniform'
@@ -121,7 +123,6 @@ switch Params.baseMdl
 
         % Femur and tibia implant names
         Params.femImplant = 'lenhart2015-R-femur-implant.stl' ;
-%         Params.tibImplant = 'tibia_medial_052.stl' ;
         Params.tibImplant = 'lenhart2015-R-tibia-implant.stl' ;
 
         % Directory with implant files
@@ -153,6 +154,7 @@ switch Params.baseMdl
 
 end
 
+% This section is to specify separate medial and lateral tibial surfaces
 switch Params.baseMdl
     case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
         % Directory with implant files
@@ -184,7 +186,7 @@ end
 %   For Combined loading tests:
 %       Add DOFs separated by hyphen:
 %       Example: compression and anterior load: ant-comp
-Params.testDOFs = { 'post-comp' } ;
+Params.testDOFs = { 'var' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
@@ -194,8 +196,10 @@ Params.kneeFlexAngles = { 30 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
+%   Add array for combined loading (e.g., for posterior and compression,
+%       "{ [ 350 , 3000 ] }" for 350N of posterior and 3000N of compression
 %   Keep these number positive
-Params.externalLoads = { [ 350 , 3000 ] } ;
+Params.externalLoads = { 10 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -348,12 +352,24 @@ end
 
 switch Params.baseMdl
     case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
-        copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
-            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-implant.stl' ) )
-        copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
-            fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant-medial.stl') )
-        copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
-            fullfile( Params.baseOutDir , Params.testDOFs{1} , 'shared' , 'lenhart2015-R-tibia-implant-lateral.stl') )
+
+        switch Params.localOrHT
+            case 'HT'
+                copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
+                    fullfile( Params.baseOutDir , Params.testDOFs{1} , 'shared' , 'lenhart2015-R-femur-implant.stl' ) )
+                copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
+                    fullfile( Params.baseOutDir , Params.testDOFs{1} , 'shared' , 'lenhart2015-R-tibia-implant-medial.stl') )
+                copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
+                    fullfile( Params.baseOutDir , Params.testDOFs{1} , 'shared' , 'lenhart2015-R-tibia-implant-lateral.stl') )
+
+            case 'local'
+                copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
+                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-femur-implant.stl' ) )
+                copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
+                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-implant-medial.stl') )
+                copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
+                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-implant-lateral.stl') )
+        end
 end
 
 
@@ -519,7 +535,6 @@ for iTrial = 1 : Params.numTrials
         testDOFs = 'flex' ;
     else
         testDOFs = strsplit( splitName{2} , '-' ) ;
-        tempLoads = str2double( extract( splitName{3}(4:end) , digitsPattern ) ) ;
     end
 
     % Create external loads files if it is a laxity test (i.e., not a
@@ -527,7 +542,7 @@ for iTrial = 1 : Params.numTrials
     if ~strcmp( testDOFs , 'flex' ) % if not passive flexion test
 
         % External load magnitude(s)
-        tempLoads = str2double( extract( splitName{3}(4:end) , digitsPattern ) ) ;
+        tempLoads = str2double( split( splitName{3}(4:end) , '-' ) ) ;
 
         % .sto and .xml File Name
         externalLoadsSto = [ 'external_loads_' , tempTrialName , '.sto' ] ;

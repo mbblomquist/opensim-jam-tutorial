@@ -31,11 +31,11 @@ clc ; clear ; close all ;
 % Specify whether to run locally or whether you will run the models on the
 % high-throughput grid
 % Options: 'local' or 'HT'
-Params.localOrHT = 'HT' ;
+Params.localOrHT = 'local' ;
 
 % Set base name of output folder where models, exectuables, and inputs
 % should be created
-Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\SarahISTA2023\PCL_082_stepDown' ;
+Params.baseOutDir = 'C:\Users\mbb201\Desktop\htcTKArelease\localTest' ;
 
 % Name of results file (no need to change this) - This is for if you ran on
 % the HT grid
@@ -47,7 +47,7 @@ Params.resultsTarFile = 'results.tar.gz' ;
 % Specif the model parameters that you want to extract
 
 % Number of models that were run
-Params.numModels = 1250 ;
+Params.numModels = 1 ;
 
 % Base model used. Options are in lenhart2015 folder
 %   Current options =
@@ -55,7 +55,7 @@ Params.numModels = 1250 ;
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
 %       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
-Params.baseMdl = 'lenhart2015_SarahISTA_PCL' ;
+Params.baseMdl = 'lenhart2015' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -89,8 +89,8 @@ Params.ligamentProperties = { 'force_total' , 'length' , 'strain' } ;
 % Compartment names for contact data
 %   Common options are 'tf_contact' (tibiofemoral joint) or 'pf_contact'
 %   (patellofemoral joint)
-% Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
-Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
+Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
+% Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
 
 % Contact data properties
 %   Many options, most common are 'mean_pressure' , 'max_pressure' ,
@@ -119,7 +119,7 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'post-comp' } ;
+Params.testDOFs = { 'var' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
@@ -130,7 +130,7 @@ Params.kneeFlexAngles = { 30 } ;
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { [ 350 , 3000 ] } ;
+Params.externalLoads = { 10 } ;
 
 %% ======================== Compute Trial Name ===========================
 % Computes the trial name(s) that will be used for running through the

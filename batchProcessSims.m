@@ -471,6 +471,16 @@ for iCntComp = 1 : numCntComp
                 case 'pf_contact'
                     cart = 'patella_implant' ;
             end
+        case 'lenhart2015_UKA'
+            % Specify which cartilage surface to find data from
+            switch cntCompNames{ iCntComp }
+                case 'tf_contact_medial'
+                    cart = 'tibia_implant_medial' ;
+                case 'tf_contact_lateral'
+                    cart = 'tibia_cartilage_lateral' ;
+                case 'pf_contact'
+                    cart = 'patella_cartilage' ;
+            end
     end
 
 
@@ -674,6 +684,10 @@ function ligNames = findLigNames( Params )
             case 'lenhart2015_SarahISTA_noPCL'
                 ligNames = { 'MCLs', 'MCLp' , ...
                     'LCL', 'ITB', 'PFL', 'pCAP', 'PT', ...
+                    'lPFL', 'mPFL' } ;
+            case 'lenhart2015_UKA'
+                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
+                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
                     'lPFL', 'mPFL' } ;
         end
     else

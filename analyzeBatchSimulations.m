@@ -55,7 +55,8 @@ Params.numModels = 1 ;
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
 %       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
 %       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
-Params.baseMdl = 'lenhart2015' ;
+%       'lenhart2015_UKA' (UKA model)
+Params.baseMdl = 'lenhart2015_UKA' ;
 
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
@@ -89,8 +90,8 @@ Params.ligamentProperties = { 'force_total' , 'length' , 'strain' } ;
 % Compartment names for contact data
 %   Common options are 'tf_contact' (tibiofemoral joint) or 'pf_contact'
 %   (patellofemoral joint)
-Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
-% Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
+% Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
+Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
 
 % Contact data properties
 %   Many options, most common are 'mean_pressure' , 'max_pressure' ,
@@ -119,18 +120,18 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'var' } ;
+Params.testDOFs = { 'flex' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 30 } ;
+Params.kneeFlexAngles = { 90 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 10 } ;
+Params.externalLoads = { 0 } ;
 
 %% ======================== Compute Trial Name ===========================
 % Computes the trial name(s) that will be used for running through the

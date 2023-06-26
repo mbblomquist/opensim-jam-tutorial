@@ -58,10 +58,18 @@ Params.numModels = 1 ;
 %       'lenhart2015_UKA' (UKA model)
 Params.baseMdl = 'lenhart2015_UKA' ;
 
+%------------%
+% KINEMATICS %
+%------------%
+
 % Joint kinematics (6 degree-of-freedom)
 %   Options: there are a lot, but the two common ones are 'knee_r' (right
 %   tibiofemoral joint) and 'pf_r' (right patellofemoral joint)
 Params.jointKinematics = { 'knee_r' , 'pf_r' } ;
+
+%---------%
+% MUSCLES %
+%---------%
 
 % Muscle names
 %   Options: there are a lot, but we usually only worry about the
@@ -73,6 +81,10 @@ Params.muscleNames = { } ;
 % Muscle properties
 %   Options: { 'force' , 'fiber_length' }
 Params.muscleProperties = { 'force' } ;
+
+%-----------%
+% LIGAMENTS %
+%-----------%
 
 % Ligament names
 %   Options: 'allLigs' to extract data on all of the ligaments in the model
@@ -87,13 +99,20 @@ Params.ligamentNames = 'allLigs' ;
 %   'lengthening_speed' , 'strain' , 'strain_rate' }
 Params.ligamentProperties = { 'force_total' , 'length' , 'strain' } ;
 
-% Compartment names for contact data
-%   Common options are 'tf_contact' (tibiofemoral joint) or 'pf_contact'
-%   (patellofemoral joint)
-% Params.contactCompartmentNames = { 'tf_contact' , 'pf_contact' } ;
-Params.contactCompartmentNames = { 'tf_contact_medial' , 'tf_contact_lateral' , 'pf_contact' } ;
+%----------------%
+% CONTACT FORCES %
+%----------------%
 
-% Contact data properties
+% Compartment names for contact data
+%   Options are 'tf' (tibiofemoral joint) or 'pf' (patellofemoral joint)
+Params.contactCompartmentNames = { 'tf' , 'pf' } ;
+
+% Regions for contact data
+%   Options are: 'total' to get total in all DOFs, or 'medial' , 'lateral'
+%   to split between medial and lateral halves
+Params.contactRegions = { 'total' , 'medial' , 'lateral' } ;
+
+% Total contact data
 %   Many options, most common are 'mean_pressure' , 'max_pressure' ,
 %   'center_of_pressure_x' , 'center_of_pressure_y' , 'center_of_pressure_z' ,
 %   'contact_force_x' , 'contact_force_y' , 'contact_force_z' ,

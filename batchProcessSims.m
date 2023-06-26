@@ -246,19 +246,31 @@ for iMdl = 1 : Params.numModels
             % Contact force data %
             %====================%
 
-            if isfield( StoData.idx , 'cnt' ) % Make sure cnt are a field
+            if isfield( StoData.idx , 'cnt' ) % Make sure cnt is a field
                 compNames = fieldnames( StoData.idx.cnt ) ;
-                cntLoadNames = fieldnames( StoData.idx.cnt.( compNames{1} ) ) ;
+                cntRegions = Params.contactRegions ;
+                cntLoadNames = fieldnames( StoData.idx.cnt.( compNames{1} ).total ) ;
 
                 % Loop through contact compartments
                 for iCntComp = 1 : length( compNames )
 
-                    % Loop through contact loads
-                    for iCntLoad = 1 : length( cntLoadNames )
-                        StoData.( tempTrialName ).cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } )( : , iMdl ) = ...
-                            tempData.frc.data( : , StoData.idx.cnt.( compNames{ iCntComp } ).( cntLoadNames{ iCntLoad } ) ) ;
+                    tempComp = compNames{ iCntComp } ;
 
-                    end % for iCntLoad
+                    % Loop through contact regions
+                    for iCntRegion = 1 : length( cntRegions )
+
+                        tempRgn = cntRegions{ iCntRegion } ;
+
+                        % Loop through contact loads
+                        for iCntLoad = 1 : length( cntLoadNames )
+
+                            tempLoad = cntLoadNames{ iCntLoad } ;
+
+                            StoData.( tempTrialName ).cnt.( tempComp ).( tempRgn ).( tempLoad )( : , iMdl ) = ...
+                                sum( tempData.frc.data( : , StoData.idx.cnt.( tempComp ).( tempRgn ).( tempLoad ) ) , 2 ) ;
+
+                        end % for iCntLoad
+                    end % for iCntRegion
                 end % for iCntComp
             end % isfield
 
@@ -434,65 +446,136 @@ for iLig = 1 : numLigs
 end
 
 
+% % Contact Forces
+% %----------------
+% cntCompNames = Params.contactCompartmentNames ;
+% cntRegions = Params.regions ;
+% contactLoadNames = Params.contactForces ;
+% 
+% 
+% % Loop through compartment names
+% for iCntComp = 1 : length( cntCompNames )
+% 
+%     switch Params.baseMdl
+%         case 'lenhart2015'
+%             % Specify which cartilage surface to find data from
+%             switch cntCompNames{ iCntComp }
+%                 case 'tf_contact'
+%                     cart = 'tibia_cartilage' ;
+%                 case 'pf_contact'
+%                     cart = 'patella_cartilage' ;
+%             end
+%         case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+%             % Specify which cartilage surface to find data from
+%             switch cntCompNames{ iCntComp }
+%                 case 'tf_contact'
+%                     cart = 'tibia_implant' ;
+%                 case 'pf_contact'
+%                     cart = 'patella_implant' ;
+%             end
+%         case 'lenhart2015_UKA'
+%             % Specify which cartilage surface to find data from
+%             switch cntCompNames{ iCntComp }
+%                 case 'tf_contact_medial'
+%                     cart = 'tibia_implant_medial' ;
+%                 case 'tf_contact_lateral'
+%                     cart = 'tibia_cartilage_lateral' ;
+%                 case 'pf_contact'
+%                     cart = 'patella_cartilage' ;
+%             end
+%     end
+% 
+% 
+%     % Loop through contact loads
+%     for iCntLoad = 1 : length( contactLoadNames )
+%         Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
+%             find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
+%             contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
+%             contains( frcLabels , cart ) ) ; % contains cartilage surface
+%     end
+% 
+% end
+
 % Contact Forces
 %----------------
 cntCompNames = Params.contactCompartmentNames ;
-numCntComp = length( cntCompNames ) ;
-contactLoadNames = Params.contactForces ;
-numContLoads = length( contactLoadNames ) ;
-
-% Loop through compartment names
-for iCntComp = 1 : numCntComp
-
-    switch Params.baseMdl
-        case 'lenhart2015'
-            % Specify which cartilage surface to find data from
-            switch cntCompNames{ iCntComp }
-                case 'tf_contact'
-                    cart = 'tibia_cartilage' ;
-                case 'pf_contact'
-                    cart = 'patella_cartilage' ;
-            end
-        case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
-            % Specify which cartilage surface to find data from
-            switch cntCompNames{ iCntComp }
-                case 'tf_contact'
-                    cart = 'tibia_implant' ;
-                case 'pf_contact'
-                    cart = 'patella_implant' ;
-            end
-        case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
-            % Specify which cartilage surface to find data from
-            switch cntCompNames{ iCntComp }
-                case 'tf_contact_medial'
-                    cart = 'tibia_implant_medial' ;
-                case 'tf_contact_lateral'
-                    cart = 'tibia_implant_lateral' ;
-                case 'pf_contact'
-                    cart = 'patella_implant' ;
-            end
-        case 'lenhart2015_UKA'
-            % Specify which cartilage surface to find data from
-            switch cntCompNames{ iCntComp }
-                case 'tf_contact_medial'
-                    cart = 'tibia_implant_medial' ;
-                case 'tf_contact_lateral'
-                    cart = 'tibia_cartilage_lateral' ;
-                case 'pf_contact'
-                    cart = 'patella_cartilage' ;
-            end
-    end
+cntLoadNames = Params.contactForces ;
 
 
-    % Loop through contact loads
-    for iCntLoad = 1 : numContLoads
-        Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
-            find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
-            contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
-            contains( frcLabels , cart ) ) ; % contains cartilage surface
-    end
+switch Params.baseMdl
+    case 'lenhart2015'
+        surfs.tf = { 'tibia_cartilage' } ;
+        surfs.pf = { 'patella_cartilage' } ;
+
+    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+        surfs.tf = { 'tibia_implant' } ;
+        surfs.pf = { 'patella_implant' } ;
+
+    case 'lenhart2015_UKA'
+        surfs.tf = { 'tibia_implant_medial' , 'tibia_cartilage_lateral' } ;
+        surfs.pf = { 'patella_cartilage' } ;
 
 end
+
+for iCntComp = 1 : length( cntCompNames )
+
+    tempComp = cntCompNames{ iCntComp } ; % temp compartment
+
+    % Loop through contact loads
+    for iCntLoad = 1 : length( cntLoadNames )
+
+        tempLoad = cntLoadNames{ iCntLoad } ; % temp contact load name
+
+        if length( surfs.( cntCompNames{iCntComp} ) ) == 1
+
+            Idx.cnt.( tempComp ).total.( tempLoad ) = ...
+                find( contains( frcLabels, tempLoad ) & ... % contains contact load name
+                contains( frcLabels , surfs.( tempComp ) ) ) ; % contains cartilage surface name
+
+            tempLoadNum = [ tempLoad(1:end-2) , '_5' , tempLoad(end-1:end) ] ;
+
+            Idx.cnt.( tempComp ).medial.( tempLoad ) = ...
+                find( contains( frcLabels, tempLoadNum ) & ... % contains contact load name
+                contains( frcLabels , surfs.( tempComp ) ) ) ; % contains cartilage surface name
+
+            tempLoadNum = [ tempLoad(1:end-2) , '_4' , tempLoad(end-1:end) ] ;
+
+            Idx.cnt.( tempComp ).lateral.( tempLoad ) = ...
+                find( contains( frcLabels, tempLoadNum ) & ... % contains contact load name
+                contains( frcLabels , surfs.( tempComp ) ) ) ; % contains cartilage surface name
+
+        else
+
+            % Loop through medial and lateral contact names
+            for iSurf = 1 : length( surfs.( tempComp ) )
+                if contains( surfs.( tempComp )(iSurf) , 'medial' )
+                    Idx.cnt.( tempComp ).medial.( tempLoad ) = ...
+                        find( contains( frcLabels , tempLoad ) & ... % contains contact load name
+                        contains( frcLabels , surfs.( tempComp )(iSurf) ) ) ; % contains cartilage surface name
+                elseif contains( surfs.( tempComp )(iSurf) , 'lateral' )
+                    Idx.cnt.( tempComp ).lateral.( tempLoad ) = ...
+                        find( contains( frcLabels , tempLoad ) & ... % contains contact load name
+                        contains( frcLabels , surfs.( tempComp )(iSurf) ) ) ; % contains cartilage surface name
+                end
+            end
+
+            Idx.cnt.( tempComp ).total.( tempLoad ) = ...
+                [ Idx.cnt.( tempComp ).medial.( tempLoad ) , ...
+                Idx.cnt.( tempComp ).lateral.( tempLoad ) ] ;
+
+        end
+
+    end
+end
+
+% % Loop through contact loads
+% for iCntLoad = 1 : length( contactLoadNames )
+%     Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
+%         find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
+%         contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
+%         contains( frcLabels , cart ) ) ; % contains cartilage surface
+% end
+
 
 % External Loads
 %---------------

@@ -445,57 +445,6 @@ for iLig = 1 : numLigs
 
 end
 
-
-% % Contact Forces
-% %----------------
-% cntCompNames = Params.contactCompartmentNames ;
-% cntRegions = Params.regions ;
-% contactLoadNames = Params.contactForces ;
-% 
-% 
-% % Loop through compartment names
-% for iCntComp = 1 : length( cntCompNames )
-% 
-%     switch Params.baseMdl
-%         case 'lenhart2015'
-%             % Specify which cartilage surface to find data from
-%             switch cntCompNames{ iCntComp }
-%                 case 'tf_contact'
-%                     cart = 'tibia_cartilage' ;
-%                 case 'pf_contact'
-%                     cart = 'patella_cartilage' ;
-%             end
-%         case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
-%             % Specify which cartilage surface to find data from
-%             switch cntCompNames{ iCntComp }
-%                 case 'tf_contact'
-%                     cart = 'tibia_implant' ;
-%                 case 'pf_contact'
-%                     cart = 'patella_implant' ;
-%             end
-%         case 'lenhart2015_UKA'
-%             % Specify which cartilage surface to find data from
-%             switch cntCompNames{ iCntComp }
-%                 case 'tf_contact_medial'
-%                     cart = 'tibia_implant_medial' ;
-%                 case 'tf_contact_lateral'
-%                     cart = 'tibia_cartilage_lateral' ;
-%                 case 'pf_contact'
-%                     cart = 'patella_cartilage' ;
-%             end
-%     end
-% 
-% 
-%     % Loop through contact loads
-%     for iCntLoad = 1 : length( contactLoadNames )
-%         Idx.cnt.( cntCompNames{ iCntComp } ).( contactLoadNames{ iCntLoad } ) = ...
-%             find( strncmpi( frcLabels, cntCompNames{ iCntComp }, length( cntCompNames{ iCntComp } ) ) & ... % contains compartment name
-%             contains( frcLabels, contactLoadNames{ iCntLoad } ) & ... % contains contact load name
-%             contains( frcLabels , cart ) ) ; % contains cartilage surface
-%     end
-% 
-% end
-
 % Contact Forces
 %----------------
 cntCompNames = Params.contactCompartmentNames ;
@@ -503,17 +452,13 @@ cntLoadNames = Params.contactForces ;
 
 
 switch Params.baseMdl
-    case 'lenhart2015'
+    case { 'lenhart2015' , 'lenhart2015_meniscus' , 'lenhart2015_OA' }
         surfs.tf = { 'tibia_cartilage' } ;
         surfs.pf = { 'patella_cartilage' } ;
 
-    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+    case { 'lenhart2015_implant' }
         surfs.tf = { 'tibia_implant' } ;
         surfs.pf = { 'patella_implant' } ;
-
-    case 'lenhart2015_UKA'
-        surfs.tf = { 'tibia_implant_medial' , 'tibia_cartilage_lateral' } ;
-        surfs.pf = { 'patella_cartilage' } ;
 
 end
 
@@ -757,21 +702,13 @@ function ligNames = findLigNames( Params )
 
     if contains( Params.ligamentNames , 'allLigs' )
         switch Params.baseMdl
-            case { 'lenhart2015' , 'lenhart2015_BCRTKA' }
+            case { 'lenhart2015' , 'lenhart2015_meniscus' , 'lenhart2015_OA' }
                 ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
                     'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
                     'lPFL', 'mPFL' } ;
-            case { 'lenhart2015_implant' , 'lenhart2015_SarahISTA_PCL' }
+            case { 'lenhart2015_implant' }
                 ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
                     'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
-            case 'lenhart2015_SarahISTA_noPCL'
-                ligNames = { 'MCLs', 'MCLp' , ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PT', ...
-                    'lPFL', 'mPFL' } ;
-            case 'lenhart2015_UKA'
-                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
-                    'lPFL', 'mPFL' } ;
         end
     else
         ligNames = Params.ligamentNames ;

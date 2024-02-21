@@ -53,10 +53,8 @@ Params.numModels = 1 ;
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
-%       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-%       'lenhart2015_SarahISTA_PCL' (for Sarah's ISTA abstract)
-%       'lenhart2015_UKA' (UKA model)
-Params.baseMdl = 'lenhart2015_UKA' ;
+%       'lenhart2015_OA' (intact model with osteophytes on femur and tibia)
+Params.baseMdl = 'lenhart2015' ;
 
 %------------%
 % KINEMATICS %
@@ -76,7 +74,9 @@ Params.jointKinematics = { 'knee_r' , 'pf_r' } ;
 %   quadriceps { 'recfem_r' , 'vasint_r' , 'vaslat_r' , 'vasmed_r' },
 %   hamstrings { 'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' }, and
 %   calf { 'gaslat_r' , 'gasmed_r' , 'soleus_r' } muscles
-Params.muscleNames = { } ;
+Params.muscleNames = { 'recfem_r' , 'vasint_r' , 'vaslat_r' , 'vasmed_r' , ...
+    'bflh_r' , 'bfsh_r' , 'semimem_r' , 'semiten_r' ...
+    'gaslat_r' , 'gasmed_r' , 'soleus_r' } ;
 
 % Muscle properties
 %   Options: { 'force' , 'fiber_length' }
@@ -130,7 +130,7 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 % Specify forward simulation test(s) to run [cell array]
 %   For Laxity Tests, options are:
 %       Anterior: 'ant'
-%       Posterior: 'post'
+%       Posterior: 'post'dd
 %       Varus: 'var'
 %       Valgus: 'val'
 %       Internal Rotation: 'ir'
@@ -139,18 +139,20 @@ Params.contactForces = { 'contact_force_x' , 'contact_force_y' , ...
 %       Distraction: 'dist'
 %   For Passive Flexion, options are:
 %       Passive: 'flex'
-Params.testDOFs = { 'flex' } ;
+% Params.testDOFs = { 'ant' , 'post' , 'var' , 'val' , 'ir' , 'er' } ;
+Params.testDOFs = { 'var' , 'val' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
-%   For passive flexion, specify the end flexion angle (starts at 0)
+%   For passive flexion, specify the end+++ flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 90 } ;
+Params.kneeFlexAngles = { 45 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Keep this number positive
-Params.externalLoads = { 0 } ;
+% Params.externalLoads = { 100 , 100 , 10 , 10 , 5 , 5 } ;
+Params.externalLoads = { 10 , 10 } ;
 
 %% ======================== Compute Trial Name ===========================
 % Computes the trial name(s) that will be used for running through the
@@ -168,11 +170,13 @@ Params.trialNames = { } ; % initialize
 trialCounter = 1 ; % counter for loop
 for iDOF = 1 : length( Params.testDOFs )
     if isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
-        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
-            Params.trialNames{ trialCounter } = ...
-                [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
-            trialCounter = trialCounter + 1 ;
-        end
+        % for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+        %     Params.trialNames{ trialCounter } = ...
+        %         [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+        %     trialCounter = trialCounter + 1 ;
+        % end
+        Params.trialNames{ trialCounter } = 'flex_passive_0_90' ;
+        trialCounter = trialCounter + 1 ;
     elseif contains( Params.testDOFs{iDOF} , '-' ) % if combined loading
         for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
             Params.trialNames{ trialCounter } = ...

@@ -29,6 +29,16 @@ probDistType = Params.probDistType ;
 probDistRef = Params.probDistRef ;
 probDistParams = Params.probDistParams ;
 
+if isequal( Params.changeLigCoords, 1)
+
+    ligCoord = Params.ligNamesCoord ;
+    ligPropCoord = Params.ligPropertiesCoord ;
+    probDistTypeCoord = Params.probDistTypeCoord ;
+    probDistRefCoord = Params.probDistRefCoord ;
+    probDistParamsCoord = Params.probDistParamsCoord ;
+
+end
+
 % Use nested function to create ligNames
 ligNames = findLigNames( Params ) ;
 
@@ -39,32 +49,57 @@ ligNames = findLigNames( Params ) ;
 % model values
 for iMdl = 1 : Params.numModels
     for iLig = 1 : length( ligNames )
-        for iProp = 1 : length( ligProps )
+        tempLig = ligNames{ iLig } ;
+        if isequal( Params.changeIdvStrandsProp , 1 )
+            numStrands = findNumStrands( tempLig ) ;
+        else
+            numStrands = 1 ;
+        end
+        for iStrand = 1 : numStrands
+            for iProp = 1 : length( ligProps )
 
-            % Switch depending on if distribution is uniform or normal
-            switch probDistType{ iProp }
-                case 'uniform'
+                % Switch depending on if distribution is uniform or normal
+                switch probDistType{ iProp }
+                    case 'uniform'
 
-                    StochMdlParams.stoch.( ligNames{ iLig } ).( ligProps{ iProp } )( iMdl, 1 ) = ...
-                        probDistParams{ iProp }( 1 ) + ...
-                        rand() * ( probDistParams{ iProp }( 2 ) - probDistParams{ iProp }( 1 ) ) ;
+                        StochMdlParams.stoch.( tempLig ).( ligProps{ iProp } )( iMdl, iStrand ) = ...
+                            probDistParams{ iProp }( 1 ) + ...
+                            rand() * ( probDistParams{ iProp }( 2 ) - probDistParams{ iProp }( 1 ) ) ;
 
-                case 'normal'
+                    case 'normal'
 
-                    StochMdlParams.stoch.( ligNames{ iLig } ).( ligProps{ iProp } )( iMdl, 1 ) = ...
-                        normrnd( probDistParams{ iProp }( 1 ) , probDistParams{ iProp }( 2 ) )  ;
+                        StochMdlParams.stoch.( ligNames{ iLig } ).( ligProps{ iProp } )( iMdl, iStrand ) = ...
+                            normrnd( probDistParams{ iProp }( 1 ) , probDistParams{ iProp }( 2 ) )  ;
 
-            end % switch probDistType
-        end % for iProp
+                end % switch probDistType
+            end % for iProp
+        end % for iStrand
     end % for iLig
 end % for iMdl
+
+if isequal(Params.changeLigCoords, 1)
+    for iMdl = 1 : Params.numModels
+        for iLig = 1 : length( ligCoord )
+            for iProp = 1 : length( ligPropCoord )
+                switch probDistTypeCoord{ iProp }
+                    case 'uniform'
+
+                        StochMdlParams.stoch.( ligCoord{ iLig } ).( ligPropCoord{ iProp } )( iMdl, 1 ) = ...
+                            probDistParamsCoord{ iProp }( 1 ) + ...
+                            rand() * ( probDistParamsCoord{ iProp }( 2 ) - probDistParamsCoord{ iProp }( 1 ) ) ;
+
+                end %switch probDistType and probDistRef
+            end %for iProp
+        end %for iLig
+    end %for iMdl
+end
 
 %% Setup OpenSim API
 %--------------------
 
 import org.opensim.modeling.*
 
-%% Build stochastic models
+%% Identify ligament(s) in model to change
 %-------------------------
 
 % Load base model
@@ -91,9 +126,82 @@ for iFrc = 0 : model.getForceSet.getSize( ) - 1
     clear force
 end % for iFrc
 
+%% Loop through models
+%---------------------
+
 % Go through each model to set new parameters
 for iMdl = 1 : Params.numModels
     stochModel = Model( model ) ; % Creates a copy of template model
+
+    % % Loop through ligament and strand to get force
+    % for iLig = 1 : length( ligNames )
+    %     for iStrand = 1 : ligStrandCnt( iLig )
+    %         force = stochModel.getForceSet.get( MdlLigNames.( ligNames{ iLig } ){ iStrand } ) ;
+    % 
+    %         initLen = 1 ;
+    % 
+    %         % Loop through properties to change values
+    %         for iProp = 1 : length( ligPropCoord )
+    %             propName = ligPropCoord{ iProp } ;
+    % 
+    %             switch probDistRefCoord{ iProp }
+    %                 case 'relativeAbs'
+    %                     abs_prop = force.getPropertyByName( 'GeometryPath' ) ;
+    %                     lig_obj = abs_prop.updValueAsObject() ;
+    %                     geomPath = GeometryPath.safeDownCast( lig_obj ) ;
+    %                     attachPts = geomPath.updPathPointSet() ;
+    % 
+    %                     if isequal( initLen , 1 )
+    %                         femAttachPts = PathPoint.safeDownCast( attachPts.get( 0 ) ) ;
+    %                         femAttachPtsArray = osimVec3ToArray( femAttachPts.get_location() ) ;
+    %                         tibAttachPts = PathPoint.safeDownCast( attachPts.get( 1 ) ) ;
+    %                         tibAttachPtsArray = osimVec3ToArray( tibAttachPts.get_location() ) ;
+    %                         initialLength = norm( femAttachPtsArray - tibAttachPtsArray ) ;
+    %                         initLen = 0 ;
+    %                     end
+    % 
+    %                     if contains( propName , 'Fem' ) % femur
+    %                         femAttachPts = PathPoint.safeDownCast( attachPts.get( 0 ) ) ;
+    %                         femAttachPtsArray = osimVec3ToArray( femAttachPts.get_location() ) ;
+    %                         if contains( propName, 'x' ) % x coord
+    %                             newCoord = femAttachPtsArray(1) + ...
+    %                                 StochMdlParams.stoch.( ligCoord{ iLig } ).( propName )( iMdl, 1 ) ;
+    %                             StochMdlParams.mdl.( ligNames{ iLig } ).( propName )( iMdl, iStrand ) = newCoord ;
+    %                             femAttachPts.set_location( Vec3( newCoord, femAttachPtsArray(2), femAttachPtsArray(3) ) )
+    %                         elseif contains( propName , 'y' ) % y coord
+    %                             newCoord = femAttachPtsArray(2) + ...
+    %                                 StochMdlParams.stoch.( ligCoord{ iLig } ).( propName )( iMdl, 1 ) ;
+    %                             StochMdlParams.mdl.( ligNames{ iLig } ).( propName )( iMdl, iStrand ) = newCoord ;
+    %                             femAttachPts.set_location( Vec3( femAttachPtsArray(1), newCoord, femAttachPtsArray(3) ) )
+    %                         end
+    %                     end
+    % 
+    %             end % switch PropDistRefCoord
+    %         end % for iProp
+    % 
+    %         femAttachPts = PathPoint.safeDownCast( attachPts.get( 0 ) ) ;
+    %         femAttachPtsArray = osimVec3ToArray( femAttachPts.get_location() ) ;
+    %         tibAttachPts = PathPoint.safeDownCast( attachPts.get( 1 ) ) ;
+    %         tibAttachPtsArray = osimVec3ToArray( tibAttachPts.get_location() ) ;
+    %         currentLength = norm( femAttachPtsArray - tibAttachPtsArray ) ;
+    % 
+    %         % Loop through properties to change values
+    %         for iProp = 1 : length( ligProps )
+    %             propName = ligProps{ iProp } ;
+    % 
+    %             ph = PropertyHelper();
+    %             currentValue = ph.getValueDouble( force.getPropertyByName( propName ) ) ;
+    %             newValue = (currentLength/initialLength) * currentValue * ...
+    %                 ( 1 + StochMdlParams.stoch.( ligNames{ iLig } ).( propName )( iMdl, iStrand ) ) ;
+    %             StochMdlParams.mdl.( ligNames{ iLig } ).( propName )( iMdl, iStrand ) = newValue ;
+    %             ph.setValueDouble( newValue, force.getPropertyByName( propName ) ) ;
+    % 
+    %         end
+    % 
+    %         clear force ph currentValue newValue
+    % 
+    %     end % for iStrand
+    % end % for iLig
 
     % Loop through ligament and strand to get force
     for iLig = 1 : length( ligNames )
@@ -158,7 +266,6 @@ save( fullfile( saveFileDir , 'stochMdlParams.mat' ) , 'StochMdlParams' )
 doneMsg = 'Done creating models' ;
 disp( doneMsg )
 
-
 end
 
 %% ========================== NESTED FUNCTIONS ===========================
@@ -166,26 +273,33 @@ end
 
 function ligNames = findLigNames( Params )
 
-    if contains( Params.ligNamesToChange , 'allLigs' )
-        switch Params.baseMdl
-            case { 'lenhart2015' , 'lenhart2015_BCRTKA' }
-                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
-                    'lPFL', 'mPFL' } ;
-            case { 'lenhart2015_implant' , 'lenhart2015_SarahISTA_PCL' }
-                ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
-                    'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
-            case 'lenhart2015_SarahISTA_noPCL'
-                ligNames = { 'MCLs', 'MCLp', ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PT', ...
-                    'lPFL', 'mPFL' } ;
-            case 'lenhart2015_UKA'
-                ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
-                    'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
-                    'lPFL', 'mPFL' } ;
-        end
-    else
-        ligNames = Params.ligNamesToChange ;
+if contains( Params.ligNamesToChange , 'allLigs' )
+    switch Params.baseMdl
+        case { 'lenhart2015' , 'lenhart2015_OA' , 'lenhart2015_meniscus' }
+            ligNames = { 'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , ...
+                'LCL', 'ITB', 'PFL', 'pCAP', 'PCLpm', 'PCLal', 'PT', ...
+                'lPFL', 'mPFL' } ;
+        case { 'lenhart2015_implant' }
+            ligNames = { 'MCLs', 'MCLp', 'LCL', 'ITB', 'PFL', ...
+                'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL' } ;
     end
+else
+    ligNames = Params.ligNamesToChange ;
+end
 
+end
+
+function numStrands = findNumStrands( ligamentName )
+switch ligamentName
+    case 'ITB'
+        numStrands = 1 ;
+    case { 'LCL' }
+        numStrands = 4 ;
+    case { 'MCLd' , 'PCLal' , 'PCLpm' , 'MCLp' , 'PFL' }
+        numStrands = 5 ;
+    case { 'MCLs' , 'ACLpl' , 'ACLam' , 'PT' , 'mPFL' }
+        numStrands = 6 ;
+    case { 'lPFL' , 'pCAP' }
+        numStrands = 8 ;
+end
 end

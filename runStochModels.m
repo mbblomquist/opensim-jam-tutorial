@@ -66,7 +66,7 @@ switch copyModelsYesNo
         % the same folder as Params.baseOutDir, then use this line:
         %   fldWithModels = Params.baseOutDir
         % Otherwise, specify which folder to copy from
-        fldWithModels = 'ADD PATH HERE' ;
+        fldWithModels = 'C:\Users\mbb201\Desktop\htcTKArelease\bam014\reference' ;
 end
 
 % Number of models to create and run
@@ -76,41 +76,82 @@ Params.numModels = 1 ;
 %   Current options =
 %       'lenhart2015' (intact model)
 %       'lenhart2015_implant' (TKA model - implants and no ACL or MCLd)
-%       'lenhart2015_BCRTKA' (BCR-TKA model - implants with ACL and MCLd)
-%       'lenhart2015_UKA' (for Sarah's ISTA abstract)
-Params.baseMdl = 'lenhart2015_UKA' ;
+%       'lenhart2015_OA' (intact model with osteophytes on femur and tibia)
+Params.baseMdl = 'lenhart2015' ;
 
-% Names of ligaments to change
-%   Options: 'allLigs' to change all the ligaments in the model
-%                           OR
-%     [cell array with each ligament you want to change]
-%       'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , 'LCL', 'ITB', 'PFL',
-%       'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL'
-Params.ligNamesToChange = 'allLigs' ;
+% ------------------------------------------------------------------------
+% --------------------- SPECIFY LIGAMENT PROPERTIES ----------------------
+% ------------------------------------------------------------------------
 
-% Ligament properties to change [cell array]
-%   Options: 'linear_stiffness', 'slack_length'
-Params.ligPropsToChange = { 'linear_stiffness' , 'slack_length' } ;
+% Change ligament properties yes or no
+Params.changeLigProps = 1 ;
 
-% TODO: ADD ABILITY TO CHANGE CARTILAGE WEAR AND ADD OSTEOPHYTES
+if isequal( Params.changeLigProps , 1 )
 
-% Probability distribution type [cell array for each ligPropsToChange]
-%   Options: 'normal' , 'uniform'
-Params.probDistType = { 'normal' , 'normal' } ;
+    % Names of ligaments to change
+    %   Options: 'allLigs' to change all the ligaments in the model
+    %                           OR
+    %     [cell array with each ligament you want to change]
+    %       'MCLd' , 'MCLs', 'MCLp', 'ACLpl' , 'ACLam' , 'LCL', 'ITB', 'PFL',
+    %       'pCAP', 'PCLpm', 'PCLal', 'PT', 'lPFL', 'mPFL'
+    Params.ligNamesToChange = 'allLigs' ;
 
-% Probability distribution reference [cell array for each ligPropsToChange]
-%   Options: 'relativePercent' , 'relativeAbs' , 'absolute'
-Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
+    % Ligament properties to change [cell array]
+    %   Options: 'linear_stiffness', 'slack_length'
+    Params.ligPropsToChange = { 'linear_stiffness' , 'slack_length' } ;
 
-% Probability distribution parameters (in percent change from baseline model)
-%  [cell array for each ligPropsToChange]
-%   For 'normal': [ <mean> , <std> ]
-%       Example: [ 0, 0.3 ] = mean of 0% change (same as baseline model)
-%       with a standard deviation of 30% from the baseline model
-%   For 'uniform': [ <lower_limit> , <upper_limit> ]
-%       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
-%       the baseline model value
-Params.probDistParams = { [ 0 , 0.25 ] , [ 0 , 0.02 ] } ;
+    % TODO: ADD ABILITY TO CHANGE CARTILAGE WEAR AND ADD OSTEOPHYTES
+
+    % Probability distribution type [cell array for each ligPropsToChange]
+    %   Options: 'normal' , 'uniform'
+    Params.probDistType = { 'normal' , 'normal' } ;
+
+    % Probability distribution reference [cell array for each ligPropsToChange]
+    %   Options: 'relativePercent' , 'relativeAbs' , 'absolute'
+    Params.probDistRef = { 'relativePercent' , 'relativePercent' } ;
+
+    % Probability distribution parameters (in percent change from baseline model)
+    %  [cell array for each ligPropsToChange]
+    %   For 'normal': [ <mean> , <std> ]
+    %       Example: [ 0, 0.3 ] = mean of 0% change (same as baseline model)
+    %       with a standard deviation of 30% from the baseline model
+    %   For 'uniform': [ <lower_limit> , <upper_limit> ]
+    %       Example: [ -0.2, 0.2 ] = limits of distribution are -20 to 20% of
+    %       the baseline model value
+    % Params.probDistParams = { [ 0 , 0.25 ] , [ 0 , 0.02 ] } ;
+    Params.probDistParams = { [ 0 , 0 ] , [ 0 , 0 ] } ;
+    % Params.probDistParams = { [ 0 , 0 ] } ;
+    % Params.probDistParams = { [ 0 , 0 ] } ;
+
+    % Change individual strands separately (1) or together (0)
+    %   Ex: Change all LCL strands by the same slack length percent would be
+    %   0. Change them separately would be 1
+    Params.changeIdvStrandsProp = 0 ;
+
+end
+
+% ------------------------------------------------------------------------
+% --------------------- SPECIFY LIGAMENT COORDINATES ---------------------
+% ------------------------------------------------------------------------
+
+% Change ligament coordinates
+Params.changeLigCoords = 0 ;
+
+if isequal( Params.changeLigCoords, 1)
+    
+    % ligs to change coordinates
+    Params.ligNamesCoord = { 'ACLam' , 'ACLpl' } ;
+    
+    % Use this if parameters are the same for all ligaments
+    % ligPropertiesCoord = { { 'xFem' ; 'yFem' } } ;
+    Params.ligPropertiesCoord = {  'xFem' , 'yFem'  } ;
+
+    Params.probDistTypeCoord = { 'uniform' , 'uniform'};
+    Params.probDistRefCoord = { 'relativeAbs' , 'relativeAbs' } ; % 'relativePercent', 'relativeAbs', or 'absolute'
+
+    Params.probDistParamsCoord = { [ -0.006, 0.001 ] , [ -0.005 , 0.004 ]  } ; % mean and std or uniform endpoints
+
+end
 
 % ------------------------------------------------------------------------
 % --------------------- SPECIFY IMPLANT PARAMETERS -----------------------
@@ -145,29 +186,16 @@ switch Params.baseMdl
         %   Tibia (VV): [ 0 , 2 ]
         % Tibial slope changes
         %   Negative values for larger tibial slope changes: [ -10 , 0 ]
+        % Params.femRot.vv = [ 0 , 2 ] ;
+        % Params.femRot.ie = [ -2 , 0 ] ;
+        % Params.tibRot.vv = [ -2 , 0 ] ;
+        % Params.femRot.vv = [ -2 , 0 ] ;
+        % Params.femRot.ie = [ 0 , 2 ] ;
+        % Params.tibRot.vv = [ 0 , 2 ] ;
+        % Params.femRot.vv = [ 1 , 1 ] ;
+        % Params.femRot.ie = [ -1 , -1 ] ;
+        % Params.tibRot.vv = [ -1 , -1 ] ;
 
-end
-
-% This section is to specify separate medial and lateral tibial surfaces
-switch Params.baseMdl
-    case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
-        % Directory with implant files
-        Params.implantDir = fullfile( pwd , 'lenhart2015' , 'Geometry' ) ;
-
-        % Femur and tibia implant names
-        Params.femImplant = 'lenhart2015-R-femur-implant.stl' ;
-        Params.tibImplantMedial = 'lenhart2015-R-tibia-implant-medial.stl' ;
-        Params.tibImplantLateral = 'lenhart2015-R-tibia-implant-lateral.stl' ;
-
-    case 'lenhart2015_UKA'
-        % Directory with implant files
-        Params.implantDir = fullfile( pwd , 'lenhart2015' , 'Geometry' ) ;
-
-        % Femur and tibia implant names
-        Params.femImplantMedial = 'femur_implant_medial.stl' ;
-        Params.femCartilageLateral = 'femur_cartilage_lateral.stl' ;
-        Params.tibImplantMedial = 'tibia_implant_medial_04.stl' ;
-        Params.tibCartilageLateral = 'tibia_cartilage_lateral.stl' ;
 end
 
 
@@ -190,20 +218,20 @@ end
 %   For Combined loading tests:
 %       Add DOFs separated by hyphen:
 %       Example: compression and anterior load: ant-comp
-Params.testDOFs = { 'flex' } ;
+Params.testDOFs = { 'var' , 'val' } ;
 
 % Specify flexion angle(s) of knee during each simulation [cell array]
 %   For passive flexion, specify the end flexion angle (starts at 0)
 %   Each testDOF will be run at each flexion angle (so the total number of
 %   simulations will be length(testDOFs) * length( kneeFlexAngles )
-Params.kneeFlexAngles = { 90 } ;
+Params.kneeFlexAngles = { 45 } ;
 
 % Specify external load(s) applied, one for each testDOFs [cell array]
 %   Put 0 if passive flexion test
 %   Add array for combined loading (e.g., for posterior and compression,
 %       "{ [ 350 , 3000 ] }" for 350N of posterior and 3000N of compression
 %   Keep these number positive
-Params.externalLoads = { 0 } ;
+Params.externalLoads = { 10 , 10 } ;
 
 %% ============ Checks to make sure Params is set up correctly ============
 % Throw an error before running code if something in Params is not set up
@@ -236,11 +264,13 @@ Params.trialNames = { } ; % initialize
 trialCounter = 1 ; % counter for loop
 for iDOF = 1 : length( Params.testDOFs )
     if isequal( Params.testDOFs{iDOF} , 'flex' ) % if passive flexion test
-        for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
-            Params.trialNames{ trialCounter } = ...
-                [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
-            trialCounter = trialCounter + 1 ;
-        end
+        % for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
+        %     Params.trialNames{ trialCounter } = ...
+        %         [ 'flex_passive_0_' , num2str( Params.kneeFlexAngles{iAng} ) ] ;
+        %     trialCounter = trialCounter + 1 ;
+        % end
+        Params.trialNames{ trialCounter } = 'flex_passive_0_90' ;
+        trialCounter = trialCounter + 1 ;
     elseif contains( Params.testDOFs{iDOF} , '-' ) % if combined loading
         for iAng = 1 : length( Params.kneeFlexAngles ) % loop through flexion angles
             Params.trialNames{ trialCounter } = ...
@@ -330,7 +360,7 @@ end
 % ========================================================================
 
 switch Params.baseMdl
-    case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+    case { 'lenhart2015_implant' }
 
         switch Params.localOrHT
             case 'local'
@@ -350,54 +380,6 @@ switch Params.baseMdl
                         copyfile( fullfile( Params.implantDir , Params.tibImplant ) , ...
                             fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant.stl') )
                     end
-                end
-        end
-
-    case { 'lenhart2015_SarahISTA_PCL' , 'lenhart2015_SarahISTA_noPCL' }
-
-        switch Params.localOrHT                
-            case 'local'
-                copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-femur-implant.stl' ) )
-                copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-implant-medial.stl') )
-                copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-implant-lateral.stl') )
-
-            case 'HT'
-                for iDOF = 1 : length( Params.testDOFs )
-                    copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-implant.stl' ) )
-                    copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant-medial.stl') )
-                    copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant-lateral.stl') )
-                end
-        end
-
-    case 'lenhart2015_UKA'
-
-        switch Params.localOrHT                
-            case 'local'
-                copyfile( fullfile( Params.implantDir , Params.femImplantMedial ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-femur-implant-medial.stl' ) )
-                copyfile( fullfile( Params.implantDir , Params.femCartilageLateral ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-femur-cartilage-lateral.stl' ) )
-                copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-implant-medial.stl') )
-                copyfile( fullfile( Params.implantDir , Params.tibCartilageLateral ) , ...
-                    fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , 'lenhart2015-R-tibia-cartilage-lateral.stl') )
-
-            case 'HT'
-                for iDOF = 1 : length( Params.testDOFs )
-                    copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-implant-medial.stl' ) )
-                    copyfile( fullfile( Params.implantDir , Params.femImplant ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-femur-cartilage-lateral.stl' ) )
-                    copyfile( fullfile( Params.implantDir , Params.tibImplantMedial ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-implant-medial.stl') )
-                    copyfile( fullfile( Params.implantDir , Params.tibImplantLateral ) , ...
-                        fullfile( Params.baseOutDir , Params.testDOFs{iDOF} , 'shared' , 'lenhart2015-R-tibia-cartilage-lateral.stl') )
                 end
         end
 end
@@ -708,6 +690,16 @@ for iTrial = 1 : Params.numTrials
                 % lenhart model reads the correct one
                 switch Params.baseMdl
                     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+                        % Baseline Models - switch to "_base.stl"
+                        newBaseFemName = [ Params.femImplant(1:end-4) , '_base.stl' ] ;
+                        newBaseTibName = [ Params.tibImplant(1:end-4) , '_base.stl' ] ;
+
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.femImplant ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , newBaseFemName ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.tibImplant ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , newBaseTibName ) )
+
+                        % Created Models - switch to Params.femImplant
                         tempStochFemName = [ Params.femImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
                         tempStochTibName = [ Params.tibImplant(1:end-4) , '_' , num2str( iMdl ) , '.stl' ] ;
 
@@ -751,6 +743,7 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
                 forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
                 forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
+
                 % Set all coordinates to be unconstrained except flexion-extension
                 forsim.set_unconstrained_coordinates( 0 , '/jointset/knee_r/knee_add_r' ) ;
                 forsim.set_unconstrained_coordinates( 1 , '/jointset/knee_r/knee_rot_r' ) ;
@@ -763,6 +756,7 @@ for iTrial = 1 : Params.numTrials
                 forsim.set_unconstrained_coordinates( 8 , '/jointset/pf_r/pf_tx_r' ) ;
                 forsim.set_unconstrained_coordinates( 9 , '/jointset/pf_r/pf_ty_r' ) ;
                 forsim.set_unconstrained_coordinates( 10 , '/jointset/pf_r/pf_tz_r' ) ;
+
                 forsim.set_prescribed_coordinates_file( fullfile( Params.baseOutDir , 'inputs' , [ 'prescribed_coordinates_' , tempTrialName , '.sto' ] ) ) ;
                 if strcmp( tempDOF , 'flex' ) % passive flexion
                     forsim.set_external_loads_file( '' ) ;
@@ -780,10 +774,17 @@ for iTrial = 1 : Params.numTrials
                 % If implant model, then switch back names of implants
                 switch Params.baseMdl
                     case { 'lenhart2015_implant' , 'lenhart2015_BCRTKA' }
+                        % Created Models - move back
                         movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.femImplant ) , ...
                             fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochFemName ) )
                         movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.tibImplant ) , ...
                             fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , tempStochTibName ) )
+
+                        % Base Models - move back
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , newBaseFemName ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.femImplant ) )
+                        movefile( fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , newBaseTibName ) , ...
+                            fullfile( Params.baseOutDir , 'stochModels' , 'Geometry' , Params.tibImplant ) )
                 end
 
             end
@@ -824,7 +825,7 @@ for iTrial = 1 : Params.numTrials
             forsim.set_stop_time( -1 ) ; % set to -1 to use data from input files
             forsim.set_integrator_accuracy( integratorAccuracy ) ; % accuracy of the solver
             forsim.set_constant_muscle_control( 0.001 ) ; % 0.001 to represent passive state
-            forsim.set_report_time_step( 0.1 ) ; % set to decrease output size
+            forsim.set_report_time_step( 0.05 ) ; % set to decrease output size
             forsim.set_use_activation_dynamics( true ) ; % use activation dynamics
             forsim.set_use_tendon_compliance( false ) ; % use tendon compliance
             forsim.set_use_muscle_physiology( true ) ; % use muscle physiology
